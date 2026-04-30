@@ -769,6 +769,66 @@ section[id] { scroll-margin-top: 88px; }
   gap: 4px;
   width: fit-content;
 }
+.hf-flow-switch {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.hf-flow-option {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  padding: 16px;
+  border: 1px solid var(--hf-line);
+  border-radius: var(--hf-radius);
+  background: white;
+  color: var(--hf-ink);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.hf-flow-option strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.hf-flow-option small {
+  color: var(--hf-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.hf-flow-option.active {
+  border-color: var(--hf-accent);
+  box-shadow: 0 0 0 3px rgba(44, 94, 80, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, #f7faf8 100%);
+}
+.hf-runt-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: var(--hf-radius-lg);
+  border: 1px solid var(--hf-line);
+  background: var(--hf-soft);
+}
+.hf-runt-callout strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hf-ink);
+}
+.hf-runt-callout p,
+.hf-flow-note {
+  color: var(--hf-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.hf-runt-callout p {
+  margin-top: 6px;
+  max-width: 58ch;
+}
+.hf-flow-note {
+  margin-top: 14px;
+}
 .hf-segment {
   border: 0;
   background: transparent;
@@ -1158,7 +1218,7 @@ section[id] { scroll-margin-top: 88px; }
   .hf-hero-copy h1 { font-size: clamp(2rem, 8vw, 2.6rem); }
   .hf-nav { display: none; }
   .hf-topbar-actions .hf-btn-ghost { display: none; }
-  .hf-product-tabs, .hf-form-grid { grid-template-columns: 1fr; }
+  .hf-product-tabs, .hf-form-grid, .hf-flow-switch { grid-template-columns: 1fr; }
   .hf-form { padding: 22px; }
   .hf-result-card { padding: 22px; }
   .hf-trust-strip-inner { gap: 16px; }
@@ -1166,4 +1226,5 @@ section[id] { scroll-margin-top: 88px; }
   .hf-cta-card, .hf-testimonial-card { padding: 32px 24px; }
   .hf-faq-item summary { padding: 18px 18px; font-size: 14px; }
   .hf-faq-item p { padding: 0 18px 18px; }
+  .hf-runt-callout { flex-direction: column; align-items: flex-start; }
 }

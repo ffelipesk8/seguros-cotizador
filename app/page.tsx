@@ -7,6 +7,7 @@ import {
   Car,
   Check,
   ChevronDown,
+  ExternalLink,
   HeartPulse,
   Phone,
   Quote,
@@ -18,6 +19,7 @@ import {
 import { products, type ProductType, type QuoteOffer, type QuoteRequest } from "@/lib/insurance-data";
 
 type FormState = QuoteRequest;
+type QuoteFlow = "fast" | "runt";
 
 const initialState: FormState = {
   product: "auto",
@@ -180,6 +182,7 @@ function useReveal<T extends HTMLElement>() {
 
 export default function HomePage() {
   const [form, setForm] = useState<FormState>(initialState);
+  const [quoteFlow, setQuoteFlow] = useState<QuoteFlow>("fast");
   const [offers, setOffers] = useState<QuoteOffer[]>([]);
   const [requestId, setRequestId] = useState("");
   const [serverMessage, setServerMessage] = useState("");
@@ -507,7 +510,61 @@ export default function HomePage() {
 
             {(form.product === "auto" || form.product === "moto") && (
               <fieldset className="hf-fieldset">
-                <legend>2. Datos del vehiculo</legend>
+                <legend>2. Flujo de consulta</legend>
+
+                <div className="hf-flow-switch" role="tablist" aria-label="Flujo de cotizacion">
+                  <button
+                    type="button"
+                    className={`hf-flow-option${quoteFlow === "fast" ? " active" : ""}`}
+                    onClick={() => setQuoteFlow("fast")}
+                    role="tab"
+                    aria-selected={quoteFlow === "fast"}
+                  >
+                    <strong>Cotizacion rapida</strong>
+                    <small>Avanza con placa o datos base y valida despues con asesor.</small>
+                  </button>
+                  <button
+                    type="button"
+                    className={`hf-flow-option${quoteFlow === "runt" ? " active" : ""}`}
+                    onClick={() => setQuoteFlow("runt")}
+                    role="tab"
+                    aria-selected={quoteFlow === "runt"}
+                  >
+                    <strong>Validacion con RUNT</strong>
+                    <small>Usa la consulta ciudadana oficial antes de seguir al cierre.</small>
+                  </button>
+                </div>
+
+                {quoteFlow === "runt" ? (
+                  <div className="hf-runt-callout">
+                    <div>
+                      <strong>Consulta asistida</strong>
+                      <p>
+                        La consulta ciudadana del RUNT suele pedir placa, documento del propietario
+                        y captcha. Por eso la manejamos como validacion asistida, no como integracion automatica.
+                      </p>
+                    </div>
+                    <a
+                      className="hf-btn hf-btn-ghost"
+                      href="https://portalpublico.runt.gov.co/#/consulta-vehiculo/consulta/consulta-ciudadana"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Abrir portal RUNT
+                      <ExternalLink size={16} />
+                    </a>
+                  </div>
+                ) : (
+                  <p className="hf-flow-note">
+                    Puedes cotizar primero y dejar la validacion documental para el cierre asistido.
+                  </p>
+                )}
+              </fieldset>
+            )}
+
+            {(form.product === "auto" || form.product === "moto") && (
+              <fieldset className="hf-fieldset">
+                <legend>{quoteFlow === "runt" ? "3. Datos del vehiculo" : "2. Datos del vehiculo"}</legend>
 
                 <div className="hf-segmented" role="tablist" aria-label="Tipo de identificacion">
                   <button
@@ -570,6 +627,17 @@ export default function HomePage() {
                       placeholder="Bogota"
                     />
                   </label>
+
+                  {quoteFlow === "runt" ? (
+                    <label className="hf-field">
+                      <span>Documento del propietario</span>
+                      <input
+                        value={form.document}
+                        onChange={(e) => updateField("document", e.target.value)}
+                        placeholder="Documento para validar en RUNT"
+                      />
+                    </label>
+                  ) : null}
                 </div>
               </fieldset>
             )}
@@ -599,7 +667,7 @@ export default function HomePage() {
             )}
 
             <fieldset className="hf-fieldset">
-              <legend>3. Datos de contacto</legend>
+              <legend>{quoteFlow === "runt" && (form.product === "auto" || form.product === "moto") ? "4. Datos de contacto" : "3. Datos de contacto"}</legend>
               <div className="hf-form-grid">
                 <label className="hf-field">
                   <span>Nombre completo</span>
