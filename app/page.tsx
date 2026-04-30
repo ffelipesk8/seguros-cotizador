@@ -7,70 +7,14 @@ import {
   Bike,
   Car,
   Check,
-  ChevronRight,
   Clock3,
   HeartPulse,
   MessageCircleMore,
-  PhoneCall,
   Shield,
-  Sparkles,
   Star,
-  TimerReset,
 } from "lucide-react";
 
 import { products, type ProductType, type QuoteOffer, type QuoteRequest } from "@/lib/insurance-data";
-
-const trustMetrics = [
-  { value: "13+", label: "alianzas listas para integrar" },
-  { value: "48h", label: "para conectar un carrier nuevo" },
-  { value: "3", label: "ofertas comparadas en la primera vista" },
-];
-
-const productNarrative = [
-  {
-    eyebrow: "Auto",
-    title: "Comparador elegante para polizas de alto volumen",
-    description:
-      "Captura por placa o por datos manuales, con salida inmediata a asesor comercial y seguimiento posterior.",
-  },
-  {
-    eyebrow: "Moto",
-    title: "Un flujo mas agil para usuarios de decision rapida",
-    description:
-      "Disenado para reducir abandono en mobile y llevar a cierre con menos pasos, menos friccion y mejor confianza.",
-  },
-  {
-    eyebrow: "Salud",
-    title: "Upsell natural dentro de la misma experiencia",
-    description:
-      "La plataforma queda lista para ampliar catalogo sin romper la narrativa visual ni el motor comercial.",
-  },
-];
-
-const principles = [
-  "Narrativa premium y mucho mas clara en el primer scroll",
-  "Jerarquia tipografica fuerte para credibilidad inmediata",
-  "Formularios con menos ruido y mas orientacion comercial",
-  "Resultados con lectura rapida para comparacion real",
-];
-
-const process = [
-  {
-    number: "01",
-    title: "Entrada inteligente",
-    body: "El usuario elige producto, entiende valor y entra al cotizador sin perderse entre demasiadas opciones.",
-  },
-  {
-    number: "02",
-    title: "Captura asistida",
-    body: "Los campos se presentan en el orden correcto: contexto, datos clave y contacto para seguimiento.",
-  },
-  {
-    number: "03",
-    title: "Comparacion premium",
-    body: "Las ofertas salen en un formato sobrio y profesional para precio, respaldo y beneficios clave.",
-  },
-];
 
 type FormState = QuoteRequest;
 
@@ -86,6 +30,27 @@ const initialState: FormState = {
   vehicleYear: 2022,
   vehicleValue: 62_000_000,
 };
+
+const proofItems = [
+  "Comparacion inmediata de planes",
+  "Atencion asistida para cierre comercial",
+  "Arquitectura lista para carriers reales",
+];
+
+const servicePillars = [
+  {
+    title: "Seleccion premium",
+    description: "No mostramos ruido. Solo opciones claras, comparables y listas para decision.",
+  },
+  {
+    title: "Acompanamiento experto",
+    description: "La experiencia esta pensada para cerrar con asesor, no para abandonar al usuario.",
+  },
+  {
+    title: "Operacion escalable",
+    description: "La capa visual ya queda lista para integrarse a aseguradoras y CRM.",
+  },
+];
 
 function productIcon(product: ProductType) {
   if (product === "auto") return <Car size={18} />;
@@ -137,180 +102,122 @@ export default function HomePage() {
   }
 
   return (
-    <main className="site-shell">
-      <section className="hero-section">
-        <div className="hero-noise" />
-        <div className="shell">
-          <header className="topbar">
-            <a className="brand-mark" href="#">
-              <span className="brand-badge">CS</span>
+    <main className="premium-site">
+      <section className="premium-hero">
+        <div className="premium-shell">
+          <header className="premium-topbar">
+            <a className="premium-brand" href="#">
+              <span className="premium-brand-mark">CS</span>
               <span>
                 <strong>Canguro Select</strong>
-                <small>Seguro digital de perfil premium</small>
+                <small>Seguros con criterio premium</small>
               </span>
             </a>
 
-            <nav className="topnav">
-              <a href="#productos">Productos</a>
-              <a href="#proceso">Proceso</a>
+            <nav className="premium-nav">
               <a href="#cotizador">Cotizar</a>
+              <a href="#servicio">Servicio</a>
+              <a href="#resultados">Resultados</a>
             </nav>
 
-            <a className="btn btn-light" href="#cotizador">
+            <a className="btn btn-outline-light" href="#cotizador">
               Empezar
             </a>
           </header>
 
-          <div className="hero-layout">
-            <div className="hero-copy">
-              <span className="eyebrow">
-                <Sparkles size={14} />
-                rediseñado con criterio de conversion y calidad visual premium
-              </span>
-              <h1>
-                Una experiencia de seguros que se siente
-                <span> seria, exclusiva y lista para vender.</span>
-              </h1>
+          <div className="premium-hero-grid">
+            <div className="premium-copy">
+              <span className="premium-kicker">Experiencia de aseguradora premium</span>
+              <h1>Seguros online con una presentacion mas sobria, elegante y confiable.</h1>
               <p>
-                Replanteamos la interfaz para que se vea como un producto financiero de alto
-                nivel: mejor lectura, mejor ritmo visual, mejor confianza y un cotizador que
-                parece hecho por una agencia top.
+                Redujimos el ruido visual y dejamos solo lo importante: confianza, claridad,
+                comparacion y conversion. Ahora el sitio se siente mas cercano a una marca de
+                seguros premium y menos a una landing generica.
               </p>
 
-              <div className="hero-actions">
-                <a className="btn btn-primary" href="#cotizador">
+              <div className="premium-hero-actions">
+                <a className="btn btn-gold" href="#cotizador">
                   Cotizar ahora
                   <ArrowRight size={18} />
                 </a>
-                <a className="btn btn-ghost" href="#proceso">
-                  Ver experiencia
+                <a className="btn btn-ghost-light" href="#resultados">
+                  Ver formato de ofertas
                 </a>
               </div>
 
-              <div className="hero-points">
-                {principles.map((principle) => (
-                  <div key={principle} className="hero-point">
+              <div className="premium-proof-list">
+                {proofItems.map((item) => (
+                  <div key={item} className="premium-proof-item">
                     <Check size={16} />
-                    <span>{principle}</span>
+                    <span>{item}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="hero-stage">
-              <div className="hero-card hero-card-primary">
-                <div className="hero-card-top">
-                  <span className="mini-label">Snapshot comercial</span>
-                  <span className="mini-chip">Preview premium</span>
-                </div>
-                <div className="hero-stat-grid">
-                  {trustMetrics.map((metric) => (
-                    <article key={metric.label} className="hero-stat">
-                      <strong>{metric.value}</strong>
-                      <span>{metric.label}</span>
-                    </article>
-                  ))}
-                </div>
-                <div className="hero-offer-preview">
-                  <div>
-                    <p>Oferta recomendada</p>
-                    <h3>Sura Auto Global Plus</h3>
-                  </div>
-                  <strong>$259.000</strong>
-                </div>
+            <div className="premium-hero-card">
+              <div className="premium-card-header">
+                <span className="premium-label">Vista previa</span>
+                <span className="premium-dot">Disponible</span>
               </div>
 
-              <div className="hero-card hero-card-secondary">
-                <div className="badge-row">
-                  <span className="soft-badge">
-                    <TimerReset size={14} />
-                    respuesta rapida
-                  </span>
-                  <span className="soft-badge">
-                    <Shield size={14} />
-                    respaldo multiaseguradora
-                  </span>
-                </div>
+              <div className="premium-price-card">
+                <p>Oferta destacada</p>
+                <h2>Sura Auto Global Plus</h2>
+                <strong>$259.000 / mes</strong>
+              </div>
 
-                <div className="product-preview-list">
-                  {products.map((product) => (
-                    <div key={product.id} className="product-preview-item">
-                      <span className="product-preview-icon">{productIcon(product.id)}</span>
-                      <div>
-                        <strong>{product.name}</strong>
-                        <p>{product.subtitle}</p>
-                      </div>
-                      <ChevronRight size={16} />
+              <div className="premium-mini-list">
+                {products.map((product) => (
+                  <div key={product.id} className="premium-mini-item">
+                    <span>{productIcon(product.id)}</span>
+                    <div>
+                      <strong>{product.name}</strong>
+                      <small>{product.subtitle}</small>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="productos" className="section">
-        <div className="shell">
-          <div className="section-heading">
-            <span className="section-kicker">Portafolio</span>
-            <h2>Una propuesta visual sobria para vender productos complejos con mas confianza.</h2>
-            <p>
-              El enfoque ya no es solo “tener un cotizador”, sino presentar una marca que
-              inspire respaldo desde la primera impresion.
-            </p>
+      <section id="servicio" className="premium-section premium-section-light">
+        <div className="premium-shell">
+          <div className="premium-section-head">
+            <span className="premium-kicker dark">Servicio</span>
+            <h2>Una interfaz con mejor criterio para un producto que necesita inspirar respaldo.</h2>
           </div>
 
-          <div className="editorial-grid">
-            {productNarrative.map((item) => (
-              <article key={item.eyebrow} className="editorial-card">
-                <span className="card-kicker">{item.eyebrow}</span>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
+          <div className="premium-pillars">
+            {servicePillars.map((pillar) => (
+              <article key={pillar.title} className="premium-pillar">
+                <h3>{pillar.title}</h3>
+                <p>{pillar.description}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="proceso" className="section section-contrast">
-        <div className="shell">
-          <div className="section-heading contrast">
-            <span className="section-kicker">Proceso UX</span>
-            <h2>Menos ruido. Mejor orientacion. Mucho mejor sensacion de producto.</h2>
+      <section id="cotizador" className="premium-section">
+        <div className="premium-shell">
+          <div className="premium-quote-head">
+            <div>
+              <span className="premium-kicker dark">Cotizador</span>
+              <h2>Formulario limpio, dirigido y con mas sensacion de servicio exclusivo.</h2>
+            </div>
             <p>
-              El rediseño organiza la experiencia como lo haria una marca financiera cuidada:
-              claridad arriba, decision al centro y comparacion al final.
+              Cada bloque aparece con un proposito claro. Menos elementos irrelevantes y mejor
+              orden para que la atencion caiga donde debe caer.
             </p>
           </div>
 
-          <div className="process-grid">
-            {process.map((step) => (
-              <article key={step.number} className="process-card">
-                <span>{step.number}</span>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="cotizador" className="section">
-        <div className="shell quote-shell">
-          <div className="quote-intro">
-            <span className="section-kicker">Cotizador</span>
-            <h2>Una interfaz de captura que se ve limpia, premium y lista para conversion.</h2>
-            <p>
-              Mantuvimos la funcionalidad principal y rediseñamos por completo la presentacion.
-              El siguiente paso natural sera conectar carriers reales y CRM.
-            </p>
-          </div>
-
-          <div className="quote-layout">
-            <div className="quote-panel">
-              <form onSubmit={handleSubmit} className="quote-form">
-                <div className="product-switch">
+          <div className="premium-quote-layout">
+            <div className="premium-form-panel">
+              <form onSubmit={handleSubmit} className="premium-form">
+                <div className="premium-product-tabs">
                   {products.map((product) => {
                     const active = form.product === product.id;
 
@@ -318,7 +225,7 @@ export default function HomePage() {
                       <button
                         key={product.id}
                         type="button"
-                        className={`product-switch-item${active ? " active" : ""}`}
+                        className={`premium-tab${active ? " active" : ""}`}
                         onClick={() => updateField("product", product.id)}
                       >
                         <span>{productIcon(product.id)}</span>
@@ -331,67 +238,67 @@ export default function HomePage() {
                   })}
                 </div>
 
-                <div className="quote-summary">
-                  <span className="card-kicker">Producto seleccionado</span>
+                <div className="premium-selected-card">
+                  <span className="premium-micro-label">Producto seleccionado</span>
                   <h3>{selectedProduct.name}</h3>
                   <p>{selectedProduct.accent}</p>
                 </div>
 
                 {(form.product === "auto" || form.product === "moto") && (
-                  <div className="segmented">
+                  <div className="premium-segmented">
                     <button
                       type="button"
-                      className={`segment${form.hasPlate ? " active" : ""}`}
+                      className={`premium-segment${form.hasPlate ? " active" : ""}`}
                       onClick={() => updateField("hasPlate", true)}
                     >
                       Con placa
                     </button>
                     <button
                       type="button"
-                      className={`segment${!form.hasPlate ? " active" : ""}`}
+                      className={`premium-segment${!form.hasPlate ? " active" : ""}`}
                       onClick={() => updateField("hasPlate", false)}
                     >
                       Sin placa
                     </button>
-                    <span className="segment-note">
+                    <span className="premium-inline-note">
                       <Clock3 size={14} />
-                      primera lectura inmediata
+                      respuesta inicial inmediata
                     </span>
                   </div>
                 )}
 
-                <div className="form-grid">
-                  <label className="field-block">
-                    <span>Identificador del vehiculo</span>
+                <div className="premium-form-grid">
+                  <label className="premium-field-block">
+                    <span>Identificador</span>
                     {form.hasPlate && (form.product === "auto" || form.product === "moto") ? (
                       <input
-                        className="field"
+                        className="premium-field"
                         value={form.plate}
                         onChange={(event) => updateField("plate", event.target.value.toUpperCase())}
-                        placeholder="Ej. ABC123"
+                        placeholder="ABC123"
                       />
                     ) : (
                       <input
-                        className="field"
+                        className="premium-field"
                         type="number"
                         value={form.vehicleYear ?? ""}
                         onChange={(event) => updateField("vehicleYear", Number(event.target.value))}
-                        placeholder="Ej. 2023"
+                        placeholder="2023"
                       />
                     )}
                   </label>
 
-                  <label className="field-block">
+                  <label className="premium-field-block">
                     <span>Ciudad</span>
                     <input
-                      className="field"
+                      className="premium-field"
                       value={form.city}
                       onChange={(event) => updateField("city", event.target.value)}
                       placeholder="Bogota"
                     />
                   </label>
 
-                  <label className="field-block">
+                  <label className="premium-field-block">
                     <span>
                       {form.product === "auto" || form.product === "moto"
                         ? "Valor aproximado"
@@ -399,7 +306,7 @@ export default function HomePage() {
                     </span>
                     {form.product === "auto" || form.product === "moto" ? (
                       <input
-                        className="field"
+                        className="premium-field"
                         type="number"
                         value={form.vehicleValue ?? ""}
                         onChange={(event) => updateField("vehicleValue", Number(event.target.value))}
@@ -407,7 +314,7 @@ export default function HomePage() {
                       />
                     ) : (
                       <input
-                        className="field"
+                        className="premium-field"
                         value={form.document}
                         onChange={(event) => updateField("document", event.target.value)}
                         placeholder="Documento"
@@ -415,21 +322,21 @@ export default function HomePage() {
                     )}
                   </label>
 
-                  <label className="field-block">
+                  <label className="premium-field-block">
                     <span>Nombre completo</span>
                     <input
-                      className="field"
+                      className="premium-field"
                       value={form.name}
                       onChange={(event) => updateField("name", event.target.value)}
-                      placeholder="Nombre del prospecto"
+                      placeholder="Nombre del cliente"
                       required
                     />
                   </label>
 
-                  <label className="field-block">
+                  <label className="premium-field-block">
                     <span>Celular</span>
                     <input
-                      className="field"
+                      className="premium-field"
                       value={form.phone}
                       onChange={(event) => updateField("phone", event.target.value)}
                       placeholder="300 000 0000"
@@ -437,127 +344,128 @@ export default function HomePage() {
                     />
                   </label>
 
-                  <label className="field-block">
+                  <label className="premium-field-block">
                     <span>Correo</span>
                     <input
-                      className="field"
+                      className="premium-field"
                       type="email"
                       value={form.email}
                       onChange={(event) => updateField("email", event.target.value)}
-                      placeholder="correo@empresa.com"
+                      placeholder="cliente@correo.com"
                       required
                     />
                   </label>
                 </div>
 
-                <div className="quote-actions">
-                  <button type="submit" className="btn btn-primary btn-large" disabled={isPending}>
-                    {isPending ? "Consultando ofertas..." : "Generar comparacion premium"}
+                <div className="premium-submit-row">
+                  <button type="submit" className="btn btn-gold btn-wide" disabled={isPending}>
+                    {isPending ? "Consultando ofertas..." : "Solicitar comparacion"}
                     <ArrowRight size={18} />
                   </button>
                   <p>
-                    Esta version devuelve ofertas demo. La estructura ya esta lista para enlazar
-                    carriers reales sin rehacer la interfaz.
+                    Version demo lista para reemplazar el endpoint por tus conexiones reales.
                   </p>
                 </div>
               </form>
             </div>
 
-            <aside className="insight-panel">
-              <div className="insight-box dark">
-                <span className="card-kicker light">Direccion visual</span>
-                <h3>Mas criterio editorial, menos look generico de plantilla.</h3>
+            <aside className="premium-aside">
+              <div className="premium-aside-card dark">
+                <span className="premium-micro-label light">Posicionamiento</span>
+                <h3>Menos landing. Mas sensacion de firma aseguradora.</h3>
                 <p>
-                  El contraste, la tipografia y el espaciado ahora trabajan como una misma
-                  marca y no como bloques sueltos.
+                  El foco ahora esta en credibilidad, orden, tono sobrio y lectura clara del
+                  valor comercial.
                 </p>
               </div>
-              <div className="insight-box">
-                <span className="soft-badge">
-                  <PhoneCall size={14} />
-                  cierre asistido
-                </span>
-                <span className="soft-badge">
-                  <MessageCircleMore size={14} />
-                  whatsapp listo
-                </span>
-                <span className="soft-badge">
-                  <BadgeCheck size={14} />
-                  comparacion inmediata
-                </span>
+              <div className="premium-aside-card">
+                <div className="premium-aside-points">
+                  <span>
+                    <BadgeCheck size={14} />
+                    comparacion curada
+                  </span>
+                  <span>
+                    <Shield size={14} />
+                    acompanamiento experto
+                  </span>
+                  <span>
+                    <MessageCircleMore size={14} />
+                    seguimiento comercial
+                  </span>
+                </div>
               </div>
             </aside>
           </div>
+        </div>
+      </section>
 
-          <div className="results-zone">
-            <div className="results-header">
-              <div>
-                <span className="section-kicker">Resultados</span>
-                <h2>Ofertas con lectura limpia para vender mejor.</h2>
-              </div>
-              {requestId ? <span className="request-pill">Solicitud {requestId}</span> : null}
+      <section id="resultados" className="premium-section premium-section-light">
+        <div className="premium-shell">
+          <div className="premium-results-head">
+            <div>
+              <span className="premium-kicker dark">Resultados</span>
+              <h2>Comparacion clara, sobria y lista para cerrar.</h2>
             </div>
-
-            <div className="results-list">
-              {offers.length > 0 ? (
-                offers.map((offer) => (
-                  <article key={`${requestId}-${offer.insurer}`} className="result-card fade-up">
-                    <div className="result-main">
-                      <div className="result-brand">
-                        <span className="soft-badge">
-                          <BadgeCheck size={14} />
-                          {offer.insurer}
-                        </span>
-                        <h3>{offer.plan}</h3>
-                        <p>{offer.highlight}</p>
-                      </div>
-
-                      <div className="result-price">
-                        <span>desde</span>
-                        <strong>${offer.monthlyPrice.toLocaleString("es-CO")}</strong>
-                        <small>por mes</small>
-                      </div>
-                    </div>
-
-                    <div className="benefit-grid">
-                      {offer.benefits.map((benefit) => (
-                        <div key={benefit} className="benefit-card">
-                          <Shield size={16} />
-                          <span>{benefit}</span>
-                        </div>
-                      ))}
-                      <div className="benefit-card accent">
-                        <Star size={16} />
-                        <span>Rating {offer.rating}</span>
-                      </div>
-                    </div>
-
-                    <div className="result-footer">
-                      <span>Deducible: {offer.deductible}</span>
-                      <div className="result-actions">
-                        <a className="btn btn-ghost-dark" href="https://wa.me/573000000000">
-                          Hablar por WhatsApp
-                        </a>
-                        <button className="btn btn-dark" type="button">
-                          Continuar cierre
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                ))
-              ) : (
-                <div className="empty-results">
-                  <h3>Aqui apareceran las mejores opciones comparadas.</h3>
-                  <p>
-                    Completa el cotizador para ver una salida mucho mas elegante, clara y
-                    profesional que la version anterior.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {serverMessage ? <p className="server-note">{serverMessage}</p> : null}
+            {requestId ? <span className="premium-request-id">Solicitud {requestId}</span> : null}
           </div>
+
+          <div className="premium-results-list">
+            {offers.length > 0 ? (
+              offers.map((offer) => (
+                <article key={`${requestId}-${offer.insurer}`} className="premium-result-card">
+                  <div className="premium-result-top">
+                    <div>
+                      <span className="premium-offer-badge">
+                        <BadgeCheck size={14} />
+                        {offer.insurer}
+                      </span>
+                      <h3>{offer.plan}</h3>
+                      <p>{offer.highlight}</p>
+                    </div>
+                    <div className="premium-result-price">
+                      <span>desde</span>
+                      <strong>${offer.monthlyPrice.toLocaleString("es-CO")}</strong>
+                      <small>por mes</small>
+                    </div>
+                  </div>
+
+                  <div className="premium-benefits">
+                    {offer.benefits.map((benefit) => (
+                      <div key={benefit} className="premium-benefit">
+                        <Shield size={16} />
+                        <span>{benefit}</span>
+                      </div>
+                    ))}
+                    <div className="premium-benefit accent">
+                      <Star size={16} />
+                      <span>Rating {offer.rating}</span>
+                    </div>
+                  </div>
+
+                  <div className="premium-result-bottom">
+                    <span>Deducible: {offer.deductible}</span>
+                    <div className="premium-result-actions">
+                      <a className="btn btn-soft-dark" href="https://wa.me/573000000000">
+                        WhatsApp
+                      </a>
+                      <button className="btn btn-dark" type="button">
+                        Continuar
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <div className="premium-empty-state">
+                <h3>Las ofertas apareceran aqui con un formato mas ejecutivo y facil de comparar.</h3>
+                <p>
+                  Completa el formulario para ver la salida premium del cotizador.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {serverMessage ? <p className="premium-server-note">{serverMessage}</p> : null}
         </div>
       </section>
     </main>
