@@ -1,26 +1,19 @@
 import type { Metadata } from "next";
-import { DM_Sans, Fraunces } from "next/font/google";
+import { Inter } from "next/font/google";
 
 import "./globals.css";
 
-const headingFont = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  weight: ["500", "600", "700"],
-  display: "swap",
-});
-
-const bodyFont = DM_Sans({
+const bodyFont = Inter({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Canguro Select | Cotiza seguros en linea",
+  title: "Seguros Hafe | Cotiza tu seguro en linea",
   description:
-    "Plataforma demo para cotizar seguros de auto, moto y salud con comparacion de ofertas, acompanamiento comercial y conexiones listas para aseguradoras.",
+    "Comparador de seguros con asesor humano. Recibe tres ofertas reales de aseguradoras vigiladas por la Superintendencia Financiera y elige la que mejor te queda.",
 };
 
 export default function RootLayout({
@@ -28,9 +21,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es" className="scroll-smooth">
-      <body className={`${headingFont.variable} ${bodyFont.variable}`}>
-        {children}
-      </body>
+      <body className={bodyFont.variable}>{children}</body>
     </html>
   );
 }

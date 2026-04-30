@@ -1,49 +1,21 @@
 "use client";
 
-import { startTransition, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
-  BadgeCheck,
   Bike,
   Car,
-  CheckCircle2,
-  Clock3,
+  Check,
+  ChevronDown,
   HeartPulse,
-  PhoneCall,
+  Phone,
+  Quote,
   ShieldCheck,
   Sparkles,
-  Stars,
+  Star,
 } from "lucide-react";
 
 import { products, type ProductType, type QuoteOffer, type QuoteRequest } from "@/lib/insurance-data";
-
-const metrics = [
-  { value: "13+", label: "aseguradoras listas para conectar" },
-  { value: "< 60s", label: "para entregar una primera comparacion" },
-  { value: "2 rutas", label: "cotizar por placa o sin placa" },
-];
-
-const steps = [
-  {
-    title: "Captura comercial clara",
-    text: "El usuario aterriza, entiende valor en segundos y entra al flujo correcto sin ruido.",
-  },
-  {
-    title: "Formulario que no fricciona",
-    text: "Pide solo los datos necesarios para devolver opciones reales y escalar a cierre comercial.",
-  },
-  {
-    title: "Comparacion accionable",
-    text: "Devuelve planes, beneficios y CTA para continuar por WhatsApp o compra asistida.",
-  },
-];
-
-const featureCards = [
-  "Cotizacion por placa o sin placa",
-  "Soporte para auto, moto y salud",
-  "Ranking de ofertas por precio y cobertura",
-  "CTA inmediato a asesor comercial",
-];
 
 type FormState = QuoteRequest;
 
@@ -56,27 +28,187 @@ const initialState: FormState = {
   name: "",
   phone: "",
   email: "",
-  vehicleYear: 2021,
-  vehicleValue: 58_000_000,
+  vehicleYear: 2022,
+  vehicleValue: 62_000_000,
 };
 
-function productIcon(product: ProductType) {
-  if (product === "auto") return <Car size={18} />;
-  if (product === "moto") return <Bike size={18} />;
-  return <HeartPulse size={18} />;
+const trustPartners = [
+  "Sura",
+  "Allianz",
+  "AXA Colpatria",
+  "Mapfre",
+  "Colsanitas",
+  "SBS",
+];
+
+const stats = [
+  { value: "24/7", label: "Asistencia en via y emergencias medicas." },
+  { value: "< 72 h", label: "Emision promedio de tu poliza." },
+  { value: "+12.000", label: "Cotizaciones procesadas en el ultimo ano." },
+];
+
+const benefits = [
+  {
+    title: "Comparas en minutos",
+    description:
+      "Llenas un solo formulario y recibes tres ofertas reales de aseguradoras aliadas, lado a lado, sin llamadas en frio.",
+  },
+  {
+    title: "Asesor humano cuando lo necesites",
+    description:
+      "Si la decision es grande, te conectamos por WhatsApp o llamada con un asesor que te explica las diferencias finas.",
+  },
+  {
+    title: "Aseguradoras vigiladas",
+    description:
+      "Trabajamos solo con companias autorizadas por la Superintendencia Financiera de Colombia. Polizas con respaldo real.",
+  },
+];
+
+const previewCoverage = [
+  { label: "Todo riesgo + asistencia 24/7", value: "Incluido" },
+  { label: "Carro de reemplazo (5 dias)", value: "Incluido" },
+  { label: "Perdida total y parcial", value: "Incluido" },
+  { label: "Deducible", value: "1 SMMLV" },
+];
+
+const testimonials = [
+  {
+    quote:
+      "Cotice mi seguro de auto un domingo en la noche y el lunes ya tenia tres ofertas comparadas. El asesor me llamo solo cuando le dije que queria, no antes.",
+    name: "Camila R.",
+    role: "Cliente Auto - Bogota",
+    rating: 4.9,
+  },
+];
+
+const faqItems = [
+  {
+    q: "El cotizador esta conectado a aseguradoras reales?",
+    a: "Hafe es un broker tecnologico vigilado. Operamos con Sura, Allianz, AXA Colpatria, Mapfre, Colsanitas y SBS. Las cifras del cotizador son estimaciones; la cotizacion en firme la confirma la aseguradora.",
+  },
+  {
+    q: "Tengo que pagar algo por usar el comparador?",
+    a: "No. Comparar y recibir asesoria humana es gratis. Hafe se compensa con la aseguradora cuando emites la poliza, sin que eso encarezca tu prima.",
+  },
+  {
+    q: "Que pasa con mis datos personales?",
+    a: "Tus datos viajan cifrados y solo se comparten con las aseguradoras necesarias para cotizar. Cumplimos la Ley 1581 de proteccion de datos personales y podes pedir borrado en cualquier momento.",
+  },
+  {
+    q: "En cuanto tiempo me emiten la poliza?",
+    a: "Una vez aceptas la oferta, la mayoria de aseguradoras emiten la poliza en menos de 72 horas habiles. Te avisamos cada paso por correo y WhatsApp.",
+  },
+  {
+    q: "Puedo hablar con un asesor humano?",
+    a: "Si. Cada oferta tiene un boton para conectar con un asesor por WhatsApp o llamada. Sin bots intermedios, sin esperas largas.",
+  },
+];
+
+const NAV_SECTIONS = [
+  { id: "cotizador", label: "Cotizar" },
+  { id: "por-que", label: "Por que Hafe" },
+  { id: "resultados", label: "Como ves la oferta" },
+  { id: "faq", label: "Preguntas" },
+];
+
+function productIcon(product: ProductType, size = 18) {
+  if (product === "auto") return <Car size={size} />;
+  if (product === "moto") return <Bike size={size} />;
+  return <HeartPulse size={size} />;
+}
+
+function useScrollSpy(ids: string[]): string {
+  const [active, setActive] = useState<string>(ids[0] ?? "");
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const observers: IntersectionObserver[] = [];
+    const visible = new Map<string, number>();
+
+    ids.forEach((id) => {
+      const node = document.getElementById(id);
+      if (!node) return;
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            visible.set(id, entry.isIntersecting ? entry.intersectionRatio : 0);
+          });
+          let bestId = ids[0];
+          let best = 0;
+          visible.forEach((ratio, key) => {
+            if (ratio > best) {
+              best = ratio;
+              bestId = key;
+            }
+          });
+          if (best > 0) setActive(bestId);
+        },
+        { rootMargin: "-30% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
+      );
+      obs.observe(node);
+      observers.push(obs);
+    });
+
+    return () => observers.forEach((obs) => obs.disconnect());
+  }, [ids]);
+
+  return active;
+}
+
+function useReveal<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add("hf-in");
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, []);
+  return ref;
 }
 
 export default function HomePage() {
   const [form, setForm] = useState<FormState>(initialState);
   const [offers, setOffers] = useState<QuoteOffer[]>([]);
-  const [requestId, setRequestId] = useState<string>("");
-  const [serverMessage, setServerMessage] = useState<string>("");
+  const [requestId, setRequestId] = useState("");
+  const [serverMessage, setServerMessage] = useState("");
   const [isPending, setIsPending] = useState(false);
+
+  const activeSection = useScrollSpy(NAV_SECTIONS.map((s) => s.id));
+  const benefitsRef = useReveal<HTMLDivElement>();
+  const statsRef = useReveal<HTMLDivElement>();
+  const testimonialRef = useReveal<HTMLDivElement>();
+  const faqRef = useReveal<HTMLDivElement>();
+  const ctaRef = useReveal<HTMLDivElement>();
 
   const selectedProduct = useMemo(
     () => products.find((item) => item.id === form.product) ?? products[0],
     [form.product],
   );
+
+  const formProgress = useMemo(() => {
+    const checks = [
+      Boolean(form.product),
+      form.product === "salud" ? Boolean(form.document) : Boolean(form.hasPlate ? form.plate : form.vehicleYear),
+      Boolean(form.city),
+      Boolean(form.name),
+      Boolean(form.phone),
+      Boolean(form.email),
+    ];
+    const filled = checks.filter(Boolean).length;
+    return Math.round((filled / checks.length) * 100);
+  }, [form]);
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -85,6 +217,7 @@ export default function HomePage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsPending(true);
+    setOffers([]);
 
     try {
       const response = await fetch("/api/quotes", {
@@ -104,478 +237,603 @@ export default function HomePage() {
         setRequestId(payload.requestId);
         setServerMessage(payload.message);
       });
+
+      requestAnimationFrame(() => {
+        const el = document.getElementById("resultados");
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } finally {
       setIsPending(false);
     }
   }
 
   return (
-    <main>
-      <section className="section" style={{ paddingTop: 24 }}>
-        <div className="shell">
-          <div
-            className="glass"
-            style={{
-              padding: "14px 18px",
-              borderRadius: 999,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 12,
-              flexWrap: "wrap",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 14,
-                  background: "linear-gradient(135deg, var(--accent), var(--brand))",
-                  color: "white",
-                  display: "grid",
-                  placeItems: "center",
-                  fontWeight: 800,
-                }}
+    <main className="hf-site">
+      <a className="hf-skip-link" href="#cotizador">
+        Saltar al cotizador
+      </a>
+
+      <header className="hf-topbar">
+        <div className="hf-shell hf-topbar-inner">
+          <a className="hf-brand" href="#">
+            <span className="hf-brand-mark" aria-hidden>
+              <ShieldCheck size={18} strokeWidth={2.2} />
+            </span>
+            <span className="hf-brand-text">
+              <strong>Seguros Hafe</strong>
+              <small>Comparador con asesor</small>
+            </span>
+          </a>
+
+          <nav className="hf-nav" aria-label="Secciones principales">
+            {NAV_SECTIONS.map((item) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className={activeSection === item.id ? "active" : undefined}
               >
-                CS
-              </div>
-              <div>
-                <strong style={{ display: "block" }}>Canguro Select</strong>
-                <span className="muted" style={{ fontSize: 14 }}>
-                  Plataforma de cotizacion online para seguros
-                </span>
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <a className="btn btn-secondary" href="#productos">
-                Productos
+                {item.label}
               </a>
-              <a className="btn btn-primary" href="#cotizador">
-                Cotizar ahora
-              </a>
-            </div>
+            ))}
+          </nav>
+
+          <div className="hf-topbar-actions">
+            <a className="hf-btn hf-btn-ghost" href="tel:+5713000000000">
+              <Phone size={16} /> 300 000 0000
+            </a>
+            <a className="hf-btn hf-btn-primary" href="#cotizador">
+              Cotizar ahora
+            </a>
           </div>
         </div>
-      </section>
+      </header>
 
-      <section className="section" style={{ paddingTop: 22 }}>
-        <div className="shell hero-grid">
-          <div className="hero-panel glass">
-            <span className="pill">
-              <Sparkles size={14} />
-              inspirado en la claridad comercial del mercado
+      <section className="hf-hero">
+        <div className="hf-hero-bg" aria-hidden>
+          <div className="hf-hero-grid-pattern" />
+          <div className="hf-hero-blob hf-hero-blob-a" />
+          <div className="hf-hero-blob hf-hero-blob-b" />
+        </div>
+
+        <div className="hf-shell hf-hero-grid">
+          <div className="hf-hero-copy">
+            <span className="hf-eyebrow">
+              <Sparkles size={14} /> Broker tecnologico de seguros
             </span>
-            <h1 style={{ fontSize: "clamp(3rem, 7vw, 5.9rem)", marginTop: 22, maxWidth: "11ch" }}>
-              Cotiza seguros en linea con una experiencia que si convierte.
+            <h1>
+              <span>Asegurar tu auto, moto o salud</span>{" "}
+              <span className="hf-hero-em">no tiene que ser un papeleo.</span>
             </h1>
-            <p className="muted" style={{ marginTop: 20, maxWidth: 620, fontSize: 18 }}>
-              Construimos una base propia para vender auto, moto y salud sin copiar otro
-              sitio literal: misma ambicion comercial, identidad nueva y backend listo para
-              conectar tus usuarios de aseguradoras.
+            <p>
+              Compara tres ofertas reales de aseguradoras vigiladas por Superfinanciera,
+              sin llamadas en frio y con un asesor humano cuando lo pidas.
             </p>
-            <div style={{ display: "flex", gap: 12, marginTop: 26, flexWrap: "wrap" }}>
-              <a className="btn btn-primary" href="#cotizador">
-                Probar cotizador
+
+            <div className="hf-hero-actions">
+              <a className="hf-btn hf-btn-primary hf-btn-lg" href="#cotizador">
+                Cotizar mi seguro
                 <ArrowRight size={18} />
               </a>
-              <a className="btn btn-secondary" href="#arquitectura">
-                Ver arquitectura
+              <a className="hf-btn hf-btn-link" href="#por-que">
+                Como trabajamos
               </a>
             </div>
-            <div className="metric-strip">
-              {metrics.map((metric) => (
-                <div key={metric.label} className="metric-card glass">
-                  <div style={{ fontSize: 34, fontWeight: 800 }}>{metric.value}</div>
-                  <div className="muted" style={{ fontSize: 14 }}>
-                    {metric.label}
-                  </div>
-                </div>
-              ))}
+
+            <div className="hf-hero-meta">
+              <div className="hf-hero-meta-row">
+                <ShieldCheck size={16} />
+                <span>
+                  Aliados con aseguradoras vigiladas por la Superintendencia Financiera de
+                  Colombia.
+                </span>
+              </div>
+              <div className="hf-hero-meta-row">
+                <Star size={16} />
+                <span>4.8 / 5 promedio en reviews de Google.</span>
+              </div>
             </div>
           </div>
 
-          <div
-            className="hero-panel"
-            style={{
-              background: "linear-gradient(180deg, rgba(20,35,29,0.96), rgba(15,78,59,0.92))",
-              color: "white",
-              borderRadius: "var(--radius-lg)",
-              boxShadow: "var(--shadow-lift)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
-              <span className="badge badge-accent">
-                <Stars size={14} />
-                Flujo principal
-              </span>
-              <span style={{ color: "rgba(255,255,255,0.74)", fontSize: 14 }}>
-                lead, comparacion, cierre asistido
+          <aside className="hf-quote-preview" aria-label="Vista previa de oferta">
+            <div className="hf-quote-preview-head">
+              <span className="hf-pill-soft">Vista previa de oferta</span>
+              <span className="hf-pill-soft hf-pill-accent">
+                <Sparkles size={12} /> Mejor cobertura
               </span>
             </div>
-            <div className="stack" style={{ marginTop: 22 }}>
-              {featureCards.map((item) => (
-                <div
-                  key={item}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: 18,
-                    borderRadius: 20,
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
-                  <CheckCircle2 size={18} color="#f6c06f" />
-                  <span>{item}</span>
+
+            <div className="hf-quote-preview-body">
+              <div className="hf-quote-insurer">
+                <span className="hf-insurer-logo hf-insurer-su">SU</span>
+                <div>
+                  <strong>Sura - Auto Global Plus</strong>
+                  <small>Bogota - Vehiculo 2022 - Todo riesgo</small>
                 </div>
-              ))}
-            </div>
-            <div style={{ marginTop: 22, padding: 18, borderRadius: 22, background: "rgba(255,255,255,0.06)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <PhoneCall size={18} color="#f6c06f" />
-                <strong>Camino comercial recomendado</strong>
               </div>
-              <p style={{ marginTop: 10, color: "rgba(255,255,255,0.76)" }}>
-                Cotiza online, muestra 3 ofertas comparables y lleva el cierre por WhatsApp,
-                llamada o pasarela cuando tengas los convenios completos.
-              </p>
+
+              <div className="hf-quote-price">
+                <small>Cuota mensual estimada</small>
+                <strong>$259.000</strong>
+                <span>Pago anual: $3.108.000 - financiable hasta 12 cuotas</span>
+              </div>
+
+              <ul className="hf-quote-coverage">
+                {previewCoverage.map((row) => (
+                  <li key={row.label}>
+                    <Check size={14} />
+                    <span>{row.label}</span>
+                    <em>{row.value}</em>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="hf-quote-preview-foot">
+                <span className="hf-quote-pulse" aria-hidden />
+                Cotizacion en linea con la aseguradora
+              </div>
             </div>
+          </aside>
+        </div>
+
+        <div className="hf-trust-strip">
+          <div className="hf-shell hf-trust-strip-inner">
+            <span>Aseguradoras aliadas</span>
+            <ul>
+              {trustPartners.map((name) => (
+                <li key={name}>{name}</li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      <section id="productos" className="section">
-        <div className="shell">
-          <span className="pill">Productos base</span>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 18,
-              alignItems: "end",
-              marginTop: 18,
-              flexWrap: "wrap",
-            }}
-          >
-            <h2 style={{ fontSize: "clamp(2.2rem, 4vw, 4rem)", maxWidth: 620 }}>
-              Mismo objetivo de negocio, propuesta propia y escalable.
-            </h2>
-            <p className="muted" style={{ maxWidth: 420 }}>
-              Esta primera entrega deja la experiencia lista para captar, cotizar y abrir
-              el camino a integraciones reales con tus credenciales.
+      <section className="hf-stats" ref={statsRef}>
+        <div className="hf-shell hf-stats-grid">
+          {stats.map((stat) => (
+            <div key={stat.label} className="hf-stat">
+              <strong>{stat.value}</strong>
+              <p>{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="por-que" className="hf-section">
+        <div className="hf-shell">
+          <div className="hf-section-head">
+            <span className="hf-eyebrow dark">Por que Hafe</span>
+            <h2>Comparar seguros sin que se sienta como llenar formularios eternos.</h2>
+            <p>
+              No te vendemos un seguro. Te ayudamos a elegir el que mejor te queda entre
+              varias aseguradoras reales, con un asesor humano de respaldo.
             </p>
           </div>
 
-          <div className="grid-3" style={{ marginTop: 28 }}>
-            {products.map((product) => (
-              <article key={product.id} className="product-card">
-                <div className="badge badge-brand">
-                  {productIcon(product.id)}
-                  {product.name}
-                </div>
-                <h3 style={{ marginTop: 16, fontSize: 30 }}>{product.subtitle}</h3>
-                <p className="muted" style={{ marginTop: 10 }}>
-                  {product.accent}
-                </p>
+          <div className="hf-benefits" ref={benefitsRef}>
+            {benefits.map((benefit, i) => (
+              <article
+                key={benefit.title}
+                className="hf-benefit-card"
+                style={{ "--hf-delay": `${i * 80}ms` } as React.CSSProperties}
+              >
+                <span className="hf-benefit-num">0{i + 1}</span>
+                <h3>{benefit.title}</h3>
+                <p>{benefit.description}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="cotizador" className="section">
-        <div className="shell quote-grid">
-          <div className="stack">
-            <span className="pill">Cotizador demo funcional</span>
-            <h2 style={{ fontSize: "clamp(2.1rem, 4vw, 4rem)" }}>
-              Formulario comercial y ofertas comparadas.
-            </h2>
-            <p className="muted" style={{ fontSize: 17 }}>
-              Ya puedes probar la experiencia principal. El endpoint local devuelve ofertas
-              demo y luego lo cambiamos por la integracion real con tus aseguradoras.
-            </p>
-
-            <div className="stack">
-              {steps.map((step, index) => (
-                <div key={step.title} className="step-card">
-                  <div className="badge badge-accent">0{index + 1}</div>
-                  <h3 style={{ marginTop: 14, fontSize: 24 }}>{step.title}</h3>
-                  <p className="muted" style={{ marginTop: 8 }}>
-                    {step.text}
-                  </p>
+      <section className="hf-testimonial" ref={testimonialRef}>
+        <div className="hf-shell">
+          {testimonials.map((t) => (
+            <figure key={t.name} className="hf-testimonial-card">
+              <Quote className="hf-testimonial-glyph" size={28} aria-hidden />
+              <blockquote>{t.quote}</blockquote>
+              <figcaption>
+                <div>
+                  <strong>{t.name}</strong>
+                  <small>{t.role}</small>
                 </div>
-              ))}
+                <div className="hf-testimonial-rating" aria-label={`${t.rating} de 5`}>
+                  <Star size={14} fill="currentColor" />
+                  <span>{t.rating} / 5</span>
+                </div>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      <section id="cotizador" className="hf-section hf-section-soft">
+        <div className="hf-shell hf-quote-layout">
+          <div className="hf-quote-intro">
+            <span className="hf-eyebrow dark">Cotizador</span>
+            <h2>Cuentanos que quieres asegurar.</h2>
+            <p>Toma 2 minutos. Despues ves tres ofertas reales y eliges con quien sigues.</p>
+
+            <ol className="hf-quote-steps">
+              <li>
+                <strong>1.</strong>
+                <span>Eliges producto y cuentas lo basico de lo que quieres asegurar.</span>
+              </li>
+              <li>
+                <strong>2.</strong>
+                <span>Recibes tres ofertas reales lado a lado con cuota, cobertura y deducible.</span>
+              </li>
+              <li>
+                <strong>3.</strong>
+                <span>Te conectamos con un asesor humano si quieres revisarla a fondo.</span>
+              </li>
+            </ol>
+
+            <div className="hf-quote-current">
+              <small>Producto seleccionado</small>
+              <strong>{selectedProduct.name}</strong>
+              <span>{selectedProduct.subtitle}</span>
+
+              <div className="hf-quote-progress" aria-hidden>
+                <div className="hf-quote-progress-track">
+                  <div className="hf-quote-progress-fill" style={{ width: `${formProgress}%` }} />
+                </div>
+                <small>{formProgress}% completado</small>
+              </div>
             </div>
           </div>
 
-          <div className="glass hero-panel">
-            <form onSubmit={handleSubmit} className="stack">
-              <div className="grid-3">
+          <form onSubmit={handleSubmit} className="hf-form" aria-label="Formulario de cotizacion">
+            <fieldset className="hf-fieldset">
+              <legend>1. Producto a asegurar</legend>
+              <div className="hf-product-tabs">
                 {products.map((product) => {
                   const active = form.product === product.id;
                   return (
                     <button
                       key={product.id}
                       type="button"
-                      className="btn"
+                      className={`hf-product-tab${active ? " active" : ""}`}
                       onClick={() => updateField("product", product.id)}
-                      style={{
-                        padding: 18,
-                        background: active ? "var(--brand-strong)" : "white",
-                        color: active ? "white" : "var(--ink)",
-                        border: active ? "none" : "1px solid var(--line)",
-                      }}
+                      aria-pressed={active}
                     >
-                      {productIcon(product.id)}
-                      {product.name}
+                      <span className="hf-product-icon">{productIcon(product.id, 20)}</span>
+                      <strong>{product.name}</strong>
+                      <small>{product.subtitle}</small>
                     </button>
                   );
                 })}
               </div>
+            </fieldset>
 
-              <div
-                style={{
-                  padding: 18,
-                  borderRadius: 22,
-                  background: "rgba(255,255,255,0.72)",
-                  border: "1px solid var(--line)",
-                }}
-              >
-                <strong>{selectedProduct.name}</strong>
-                <p className="muted" style={{ marginTop: 6 }}>
-                  {selectedProduct.subtitle}
-                </p>
-              </div>
+            {(form.product === "auto" || form.product === "moto") && (
+              <fieldset className="hf-fieldset">
+                <legend>2. Datos del vehiculo</legend>
 
-              {(form.product === "auto" || form.product === "moto") && (
-                <div className="grid-3">
+                <div className="hf-segmented" role="tablist" aria-label="Tipo de identificacion">
                   <button
                     type="button"
-                    className="btn"
+                    className={`hf-segment${form.hasPlate ? " active" : ""}`}
                     onClick={() => updateField("hasPlate", true)}
-                    style={{
-                      background: form.hasPlate ? "var(--accent)" : "white",
-                      color: form.hasPlate ? "white" : "var(--ink)",
-                      border: form.hasPlate ? "none" : "1px solid var(--line)",
-                    }}
+                    role="tab"
+                    aria-selected={form.hasPlate}
                   >
                     Con placa
                   </button>
                   <button
                     type="button"
-                    className="btn"
+                    className={`hf-segment${!form.hasPlate ? " active" : ""}`}
                     onClick={() => updateField("hasPlate", false)}
-                    style={{
-                      background: !form.hasPlate ? "var(--accent)" : "white",
-                      color: !form.hasPlate ? "white" : "var(--ink)",
-                      border: !form.hasPlate ? "none" : "1px solid var(--line)",
-                    }}
+                    role="tab"
+                    aria-selected={!form.hasPlate}
                   >
                     Sin placa
                   </button>
-                  <div className="badge badge-brand" style={{ justifyContent: "center" }}>
-                    <Clock3 size={14} />
-                    entrega inmediata
-                  </div>
                 </div>
-              )}
 
-              <div className="grid-3">
-                {form.hasPlate && (form.product === "auto" || form.product === "moto") ? (
-                  <input
-                    className="field"
-                    value={form.plate}
-                    onChange={(event) => updateField("plate", event.target.value.toUpperCase())}
-                    placeholder="Placa"
-                  />
-                ) : (
-                  <input
-                    className="field"
-                    type="number"
-                    value={form.vehicleYear ?? ""}
-                    onChange={(event) => updateField("vehicleYear", Number(event.target.value))}
-                    placeholder="Modelo"
-                  />
-                )}
+                <div className="hf-form-grid">
+                  {form.hasPlate ? (
+                    <label className="hf-field">
+                      <span>Placa</span>
+                      <input
+                        value={form.plate}
+                        onChange={(e) => updateField("plate", e.target.value.toUpperCase())}
+                        placeholder="ABC123"
+                      />
+                    </label>
+                  ) : (
+                    <label className="hf-field">
+                      <span>Ano del vehiculo</span>
+                      <input
+                        type="number"
+                        value={form.vehicleYear ?? ""}
+                        onChange={(e) => updateField("vehicleYear", Number(e.target.value))}
+                        placeholder="2023"
+                      />
+                    </label>
+                  )}
 
-                <input
-                  className="field"
-                  value={form.city}
-                  onChange={(event) => updateField("city", event.target.value)}
-                  placeholder="Ciudad"
-                />
+                  <label className="hf-field">
+                    <span>Valor asegurado aproximado</span>
+                    <input
+                      type="number"
+                      value={form.vehicleValue ?? ""}
+                      onChange={(e) => updateField("vehicleValue", Number(e.target.value))}
+                      placeholder="62000000"
+                    />
+                  </label>
 
-                {(form.product === "auto" || form.product === "moto") ? (
+                  <label className="hf-field">
+                    <span>Ciudad de circulacion</span>
+                    <input
+                      value={form.city}
+                      onChange={(e) => updateField("city", e.target.value)}
+                      placeholder="Bogota"
+                    />
+                  </label>
+                </div>
+              </fieldset>
+            )}
+
+            {form.product === "salud" && (
+              <fieldset className="hf-fieldset">
+                <legend>2. Datos del titular</legend>
+                <div className="hf-form-grid">
+                  <label className="hf-field">
+                    <span>Documento de identidad</span>
+                    <input
+                      value={form.document}
+                      onChange={(e) => updateField("document", e.target.value)}
+                      placeholder="C.C. 1.000.000.000"
+                    />
+                  </label>
+                  <label className="hf-field">
+                    <span>Ciudad</span>
+                    <input
+                      value={form.city}
+                      onChange={(e) => updateField("city", e.target.value)}
+                      placeholder="Bogota"
+                    />
+                  </label>
+                </div>
+              </fieldset>
+            )}
+
+            <fieldset className="hf-fieldset">
+              <legend>3. Datos de contacto</legend>
+              <div className="hf-form-grid">
+                <label className="hf-field">
+                  <span>Nombre completo</span>
                   <input
-                    className="field"
-                    type="number"
-                    value={form.vehicleValue ?? ""}
-                    onChange={(event) => updateField("vehicleValue", Number(event.target.value))}
-                    placeholder="Valor aproximado"
+                    value={form.name}
+                    onChange={(e) => updateField("name", e.target.value)}
+                    placeholder="Camila Restrepo"
+                    required
                   />
-                ) : (
+                </label>
+                <label className="hf-field">
+                  <span>Celular</span>
                   <input
-                    className="field"
-                    value={form.document}
-                    onChange={(event) => updateField("document", event.target.value)}
-                    placeholder="Documento"
+                    value={form.phone}
+                    onChange={(e) => updateField("phone", e.target.value)}
+                    placeholder="300 000 0000"
+                    required
                   />
-                )}
+                </label>
+                <label className="hf-field hf-field-full">
+                  <span>Correo electronico</span>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => updateField("email", e.target.value)}
+                    placeholder="camila@correo.com"
+                    required
+                  />
+                </label>
               </div>
+            </fieldset>
 
-              <div className="grid-3">
-                <input
-                  className="field"
-                  value={form.name}
-                  onChange={(event) => updateField("name", event.target.value)}
-                  placeholder="Nombre completo"
-                  required
-                />
-                <input
-                  className="field"
-                  value={form.phone}
-                  onChange={(event) => updateField("phone", event.target.value)}
-                  placeholder="Celular"
-                  required
-                />
-                <input
-                  className="field"
-                  type="email"
-                  value={form.email}
-                  onChange={(event) => updateField("email", event.target.value)}
-                  placeholder="Correo"
-                  required
-                />
-              </div>
-
-              <button type="submit" className="btn btn-primary" disabled={isPending}>
-                {isPending ? "Consultando ofertas..." : "Ver mejores opciones ahora"}
-                <ArrowRight size={18} />
+            <div className="hf-form-foot">
+              <button type="submit" className="hf-btn hf-btn-primary hf-btn-lg" disabled={isPending}>
+                {isPending ? "Buscando ofertas..." : "Ver mis tres ofertas"}
+                {!isPending && <ArrowRight size={18} />}
               </button>
-            </form>
-          </div>
+              <small>
+                Al enviar aceptas el tratamiento de datos segun nuestra politica de privacidad.
+              </small>
+            </div>
+          </form>
         </div>
+      </section>
 
-        <div className="shell" style={{ marginTop: 28 }}>
-          <div className="stack">
-            {offers.length > 0 ? (
-              offers.map((offer) => (
-                <article key={`${requestId}-${offer.insurer}`} className="offer-card fade-up">
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 18,
-                      alignItems: "start",
-                      flexWrap: "wrap",
-                    }}
-                  >
+      <section id="resultados" className="hf-section">
+        <div className="hf-shell">
+          <div className="hf-section-head row">
+            <div>
+              <span className="hf-eyebrow dark">Resultados</span>
+              <h2>Tus ofertas comparadas.</h2>
+              <p>Tres aseguradoras lado a lado, con coberturas reales y cuota mensual.</p>
+            </div>
+            {requestId ? <span className="hf-pill-soft">Solicitud {requestId}</span> : null}
+          </div>
+
+          {isPending ? (
+            <div className="hf-results-grid">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="hf-result-card hf-skeleton" aria-hidden>
+                  <div className="hf-skel hf-skel-row" style={{ width: "60%" }} />
+                  <div className="hf-skel hf-skel-row hf-skel-lg" style={{ width: "70%" }} />
+                  <div className="hf-skel hf-skel-row" style={{ width: "92%" }} />
+                  <div className="hf-skel hf-skel-row" style={{ width: "84%" }} />
+                  <div className="hf-skel hf-skel-row" style={{ width: "76%" }} />
+                  <div className="hf-skel hf-skel-row" style={{ width: "60%" }} />
+                </div>
+              ))}
+            </div>
+          ) : offers.length > 0 ? (
+            <div className="hf-results-grid">
+              {offers.map((offer, index) => (
+                <article
+                  key={`${requestId}-${offer.insurer}`}
+                  className={`hf-result-card${index === 0 ? " featured" : ""}`}
+                >
+                  {index === 0 && <span className="hf-result-flag">Mejor cobertura</span>}
+
+                  <header className="hf-result-head">
+                    <span className={`hf-insurer-logo hf-insurer-${index}`}>
+                      {offer.insurer.slice(0, 2).toUpperCase()}
+                    </span>
                     <div>
-                      <div className="badge badge-brand">
-                        <BadgeCheck size={14} />
-                        {offer.insurer}
-                      </div>
-                      <h3 style={{ fontSize: 30, marginTop: 12 }}>{offer.plan}</h3>
-                      <p className="muted" style={{ marginTop: 8, maxWidth: 720 }}>
-                        {offer.highlight}
-                      </p>
+                      <strong>{offer.insurer}</strong>
+                      <small>{offer.plan}</small>
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: 14 }} className="muted">
-                        desde
-                      </div>
-                      <strong style={{ fontSize: 38 }}>
-                        ${offer.monthlyPrice.toLocaleString("es-CO")}
-                      </strong>
-                      <div className="muted">/ mes</div>
-                    </div>
+                  </header>
+
+                  <div className="hf-result-price">
+                    <small>Cuota mensual</small>
+                    <strong>${offer.monthlyPrice.toLocaleString("es-CO")}</strong>
+                    <span>Anual desde ${(offer.monthlyPrice * 12).toLocaleString("es-CO")}</span>
                   </div>
 
-                  <div className="soft-divider" style={{ margin: "18px 0" }} />
-
-                  <div className="grid-4">
+                  <ul className="hf-result-coverage">
                     {offer.benefits.map((benefit) => (
-                      <div key={benefit} className="feature-card" style={{ padding: 16 }}>
-                        <ShieldCheck size={16} color="var(--brand)" />
-                        <div style={{ marginTop: 10, fontWeight: 700 }}>{benefit}</div>
-                      </div>
+                      <li key={benefit}>
+                        <Check size={14} /> {benefit}
+                      </li>
                     ))}
-                    <div className="feature-card" style={{ padding: 16 }}>
-                      <Stars size={16} color="var(--accent)" />
-                      <div style={{ marginTop: 10, fontWeight: 700 }}>Rating {offer.rating}</div>
-                    </div>
-                  </div>
+                    <li className="muted">
+                      Deducible: <em>{offer.deductible}</em>
+                    </li>
+                  </ul>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 14,
-                      alignItems: "center",
-                      marginTop: 18,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <span className="muted">Deducible: {offer.deductible}</span>
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                      <a className="btn btn-secondary" href="https://wa.me/573000000000">
-                        Hablar con asesor
-                      </a>
-                      <button className="btn btn-primary" type="button">
-                        Continuar compra
-                      </button>
-                    </div>
+                  <p className="hf-result-highlight">{offer.highlight}</p>
+
+                  <div className="hf-result-actions">
+                    <a className="hf-btn hf-btn-ghost" href="https://wa.me/573000000000">
+                      Asesor
+                    </a>
+                    <button type="button" className="hf-btn hf-btn-primary">
+                      Continuar
+                    </button>
                   </div>
                 </article>
-              ))
-            ) : (
-              <div className="offer-card">
-                <h3 style={{ fontSize: 28 }}>Aun no hay ofertas generadas.</h3>
-                <p className="muted" style={{ marginTop: 10 }}>
-                  Completa el formulario para ver una comparacion demo del flujo principal.
-                </p>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="hf-empty">
+              <span className="hf-empty-glyph" aria-hidden>
+                <Sparkles size={20} />
+              </span>
+              <h3>Tus tres ofertas apareceran aqui cuando completes el cotizador.</h3>
+              <p>
+                Veras la cuota mensual, las coberturas principales y el deducible de cada
+                aseguradora, lado a lado, sin ruido.
+              </p>
+              <a className="hf-btn hf-btn-primary" href="#cotizador">
+                Empezar cotizador
+                <ArrowRight size={16} />
+              </a>
+            </div>
+          )}
 
-          {serverMessage ? (
-            <p className="muted" style={{ marginTop: 16 }}>
-              {serverMessage}
+          {serverMessage ? <p className="hf-note">{serverMessage}</p> : null}
+        </div>
+      </section>
+
+      <section id="faq" className="hf-section hf-section-soft" ref={faqRef}>
+        <div className="hf-shell hf-faq-layout">
+          <div className="hf-faq-intro">
+            <span className="hf-eyebrow dark">Preguntas frecuentes</span>
+            <h2>Lo que normalmente nos preguntan antes de cotizar.</h2>
+            <p>
+              Si te queda una duda fuera de esta lista, escribinos por WhatsApp y un asesor te
+              responde el mismo dia.
             </p>
-          ) : null}
-        </div>
-      </section>
+          </div>
 
-      <section id="arquitectura" className="section">
-        <div className="shell">
-          <span className="pill">Arquitectura sugerida</span>
-          <div className="grid-3" style={{ marginTop: 22 }}>
-            <article className="feature-card">
-              <h3 style={{ fontSize: 28 }}>Frontend comercial</h3>
-              <p className="muted" style={{ marginTop: 10 }}>
-                Landing, cotizador, resultados y CTA de cierre. Ya quedo planteado en este
-                proyecto con App Router y endpoint local.
-              </p>
-            </article>
-            <article className="feature-card">
-              <h3 style={{ fontSize: 28 }}>Broker middleware</h3>
-              <p className="muted" style={{ marginTop: 10 }}>
-                Capa privada donde conectas cada aseguradora, normalizas respuestas y
-                manejas credenciales sin exponerlas al frontend.
-              </p>
-            </article>
-            <article className="feature-card">
-              <h3 style={{ fontSize: 28 }}>CRM o bandeja comercial</h3>
-              <p className="muted" style={{ marginTop: 10 }}>
-                Leads, estados de cierre, documentos y renovaciones. Es el siguiente bloque
-                natural despues del cotizador.
-              </p>
-            </article>
+          <div className="hf-faq-list">
+            {faqItems.map((item, i) => (
+              <details key={item.q} className="hf-faq-item" open={i === 0}>
+                <summary>
+                  <span>{item.q}</span>
+                  <ChevronDown size={18} className="hf-faq-chev" aria-hidden />
+                </summary>
+                <p>{item.a}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
+
+      <section className="hf-cta" ref={ctaRef}>
+        <div className="hf-shell hf-cta-card">
+          <div>
+            <span className="hf-eyebrow light">
+              <Sparkles size={14} /> Listo en 2 minutos
+            </span>
+            <h2>Compara tu seguro hoy. Cierra cuando estes seguro.</h2>
+            <p>
+              Tres ofertas reales, un asesor humano si lo pides, y una decision con respaldo de
+              aseguradoras vigiladas.
+            </p>
+          </div>
+          <div className="hf-cta-actions">
+            <a className="hf-btn hf-btn-light hf-btn-lg" href="#cotizador">
+              Empezar cotizador
+              <ArrowRight size={18} />
+            </a>
+            <a className="hf-btn hf-btn-ghost-light" href="https://wa.me/573000000000">
+              Hablar con asesor
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer className="hf-footer">
+        <div className="hf-shell hf-footer-grid">
+          <div>
+            <a className="hf-brand small" href="#">
+              <span className="hf-brand-mark" aria-hidden>
+                <ShieldCheck size={16} strokeWidth={2.2} />
+              </span>
+              <span className="hf-brand-text">
+                <strong>Seguros Hafe</strong>
+              </span>
+            </a>
+            <p>
+              Hafe es un broker tecnologico de seguros vigilado por la Superintendencia
+              Financiera de Colombia. Trabajamos con aseguradoras autorizadas para emitir
+              polizas con respaldo real.
+            </p>
+            <div className="hf-footer-badges">
+              <span>Vigilado Superfinanciera</span>
+              <span>SSL 256-bit</span>
+              <span>Habeas Data</span>
+            </div>
+          </div>
+          <div>
+            <strong>Contacto</strong>
+            <ul>
+              <li>300 000 0000</li>
+              <li>hola@segurohafe.com</li>
+              <li>Bogota, Colombia</li>
+            </ul>
+          </div>
+          <div>
+            <strong>Legal</strong>
+            <ul>
+              <li>Politica de tratamiento de datos</li>
+              <li>Terminos y condiciones</li>
+              <li>NIT 900.000.000-0</li>
+            </ul>
+          </div>
+        </div>
+        <div className="hf-shell hf-footer-meta">
+          <span>(c) 2026 Seguros Hafe S.A.S.</span>
+          <span>
+            Las cifras del cotizador son estimaciones; la cobertura final depende de cada aseguradora.
+          </span>
+        </div>
+      </footer>
     </main>
   );
 }
