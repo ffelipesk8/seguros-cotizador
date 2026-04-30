@@ -6,43 +6,70 @@ import {
   BadgeCheck,
   Bike,
   Car,
-  CheckCircle2,
+  Check,
+  ChevronRight,
   Clock3,
   HeartPulse,
+  MessageCircleMore,
   PhoneCall,
-  ShieldCheck,
+  Shield,
   Sparkles,
-  Stars,
+  Star,
+  TimerReset,
 } from "lucide-react";
 
 import { products, type ProductType, type QuoteOffer, type QuoteRequest } from "@/lib/insurance-data";
 
-const metrics = [
-  { value: "13+", label: "aseguradoras listas para conectar" },
-  { value: "< 60s", label: "para entregar una primera comparacion" },
-  { value: "2 rutas", label: "cotizar por placa o sin placa" },
+const trustMetrics = [
+  { value: "13+", label: "alianzas listas para integrar" },
+  { value: "48h", label: "para conectar un carrier nuevo" },
+  { value: "3", label: "ofertas comparadas en la primera vista" },
 ];
 
-const steps = [
+const productNarrative = [
   {
-    title: "Captura comercial clara",
-    text: "El usuario aterriza, entiende valor en segundos y entra al flujo correcto sin ruido.",
+    eyebrow: "Auto",
+    title: "Comparador elegante para polizas de alto volumen",
+    description:
+      "Captura por placa o por datos manuales, con salida inmediata a asesor comercial y seguimiento posterior.",
   },
   {
-    title: "Formulario que no fricciona",
-    text: "Pide solo los datos necesarios para devolver opciones reales y escalar a cierre comercial.",
+    eyebrow: "Moto",
+    title: "Un flujo mas agil para usuarios de decision rapida",
+    description:
+      "Disenado para reducir abandono en mobile y llevar a cierre con menos pasos, menos friccion y mejor confianza.",
   },
   {
-    title: "Comparacion accionable",
-    text: "Devuelve planes, beneficios y CTA para continuar por WhatsApp o compra asistida.",
+    eyebrow: "Salud",
+    title: "Upsell natural dentro de la misma experiencia",
+    description:
+      "La plataforma queda lista para ampliar catalogo sin romper la narrativa visual ni el motor comercial.",
   },
 ];
 
-const featureCards = [
-  "Cotizacion por placa o sin placa",
-  "Soporte para auto, moto y salud",
-  "Ranking de ofertas por precio y cobertura",
-  "CTA inmediato a asesor comercial",
+const principles = [
+  "Narrativa premium y mucho mas clara en el primer scroll",
+  "Jerarquia tipografica fuerte para credibilidad inmediata",
+  "Formularios con menos ruido y mas orientacion comercial",
+  "Resultados con lectura rapida para comparacion real",
+];
+
+const process = [
+  {
+    number: "01",
+    title: "Entrada inteligente",
+    body: "El usuario elige producto, entiende valor y entra al cotizador sin perderse entre demasiadas opciones.",
+  },
+  {
+    number: "02",
+    title: "Captura asistida",
+    body: "Los campos se presentan en el orden correcto: contexto, datos clave y contacto para seguimiento.",
+  },
+  {
+    number: "03",
+    title: "Comparacion premium",
+    body: "Las ofertas salen en un formato sobrio y profesional para precio, respaldo y beneficios clave.",
+  },
 ];
 
 type FormState = QuoteRequest;
@@ -56,8 +83,8 @@ const initialState: FormState = {
   name: "",
   phone: "",
   email: "",
-  vehicleYear: 2021,
-  vehicleValue: 58_000_000,
+  vehicleYear: 2022,
+  vehicleValue: 62_000_000,
 };
 
 function productIcon(product: ProductType) {
@@ -69,8 +96,8 @@ function productIcon(product: ProductType) {
 export default function HomePage() {
   const [form, setForm] = useState<FormState>(initialState);
   const [offers, setOffers] = useState<QuoteOffer[]>([]);
-  const [requestId, setRequestId] = useState<string>("");
-  const [serverMessage, setServerMessage] = useState<string>("");
+  const [requestId, setRequestId] = useState("");
+  const [serverMessage, setServerMessage] = useState("");
   const [isPending, setIsPending] = useState(false);
 
   const selectedProduct = useMemo(
@@ -110,137 +137,114 @@ export default function HomePage() {
   }
 
   return (
-    <main>
-      <section className="section" style={{ paddingTop: 24 }}>
+    <main className="site-shell">
+      <section className="hero-section">
+        <div className="hero-noise" />
         <div className="shell">
-          <div
-            className="glass"
-            style={{
-              padding: "14px 18px",
-              borderRadius: 999,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 12,
-              flexWrap: "wrap",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 14,
-                  background: "linear-gradient(135deg, var(--accent), var(--brand))",
-                  color: "white",
-                  display: "grid",
-                  placeItems: "center",
-                  fontWeight: 800,
-                }}
-              >
-                CS
-              </div>
-              <div>
-                <strong style={{ display: "block" }}>Canguro Select</strong>
-                <span className="muted" style={{ fontSize: 14 }}>
-                  Plataforma de cotizacion online para seguros
-                </span>
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <a className="btn btn-secondary" href="#productos">
-                Productos
-              </a>
-              <a className="btn btn-primary" href="#cotizador">
-                Cotizar ahora
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section" style={{ paddingTop: 22 }}>
-        <div className="shell hero-grid">
-          <div className="hero-panel glass">
-            <span className="pill">
-              <Sparkles size={14} />
-              inspirado en la claridad comercial del mercado
-            </span>
-            <h1 style={{ fontSize: "clamp(3rem, 7vw, 5.9rem)", marginTop: 22, maxWidth: "11ch" }}>
-              Cotiza seguros en linea con una experiencia que si convierte.
-            </h1>
-            <p className="muted" style={{ marginTop: 20, maxWidth: 620, fontSize: 18 }}>
-              Construimos una base propia para vender auto, moto y salud sin copiar otro
-              sitio literal: misma ambicion comercial, identidad nueva y backend listo para
-              conectar tus usuarios de aseguradoras.
-            </p>
-            <div style={{ display: "flex", gap: 12, marginTop: 26, flexWrap: "wrap" }}>
-              <a className="btn btn-primary" href="#cotizador">
-                Probar cotizador
-                <ArrowRight size={18} />
-              </a>
-              <a className="btn btn-secondary" href="#arquitectura">
-                Ver arquitectura
-              </a>
-            </div>
-            <div className="metric-strip">
-              {metrics.map((metric) => (
-                <div key={metric.label} className="metric-card glass">
-                  <div style={{ fontSize: 34, fontWeight: 800 }}>{metric.value}</div>
-                  <div className="muted" style={{ fontSize: 14 }}>
-                    {metric.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div
-            className="hero-panel"
-            style={{
-              background: "linear-gradient(180deg, rgba(20,35,29,0.96), rgba(15,78,59,0.92))",
-              color: "white",
-              borderRadius: "var(--radius-lg)",
-              boxShadow: "var(--shadow-lift)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
-              <span className="badge badge-accent">
-                <Stars size={14} />
-                Flujo principal
+          <header className="topbar">
+            <a className="brand-mark" href="#">
+              <span className="brand-badge">CS</span>
+              <span>
+                <strong>Canguro Select</strong>
+                <small>Seguro digital de perfil premium</small>
               </span>
-              <span style={{ color: "rgba(255,255,255,0.74)", fontSize: 14 }}>
-                lead, comparacion, cierre asistido
+            </a>
+
+            <nav className="topnav">
+              <a href="#productos">Productos</a>
+              <a href="#proceso">Proceso</a>
+              <a href="#cotizador">Cotizar</a>
+            </nav>
+
+            <a className="btn btn-light" href="#cotizador">
+              Empezar
+            </a>
+          </header>
+
+          <div className="hero-layout">
+            <div className="hero-copy">
+              <span className="eyebrow">
+                <Sparkles size={14} />
+                rediseñado con criterio de conversion y calidad visual premium
               </span>
-            </div>
-            <div className="stack" style={{ marginTop: 22 }}>
-              {featureCards.map((item) => (
-                <div
-                  key={item}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: 18,
-                    borderRadius: 20,
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
-                  <CheckCircle2 size={18} color="#f6c06f" />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: 22, padding: 18, borderRadius: 22, background: "rgba(255,255,255,0.06)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <PhoneCall size={18} color="#f6c06f" />
-                <strong>Camino comercial recomendado</strong>
-              </div>
-              <p style={{ marginTop: 10, color: "rgba(255,255,255,0.76)" }}>
-                Cotiza online, muestra 3 ofertas comparables y lleva el cierre por WhatsApp,
-                llamada o pasarela cuando tengas los convenios completos.
+              <h1>
+                Una experiencia de seguros que se siente
+                <span> seria, exclusiva y lista para vender.</span>
+              </h1>
+              <p>
+                Replanteamos la interfaz para que se vea como un producto financiero de alto
+                nivel: mejor lectura, mejor ritmo visual, mejor confianza y un cotizador que
+                parece hecho por una agencia top.
               </p>
+
+              <div className="hero-actions">
+                <a className="btn btn-primary" href="#cotizador">
+                  Cotizar ahora
+                  <ArrowRight size={18} />
+                </a>
+                <a className="btn btn-ghost" href="#proceso">
+                  Ver experiencia
+                </a>
+              </div>
+
+              <div className="hero-points">
+                {principles.map((principle) => (
+                  <div key={principle} className="hero-point">
+                    <Check size={16} />
+                    <span>{principle}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="hero-stage">
+              <div className="hero-card hero-card-primary">
+                <div className="hero-card-top">
+                  <span className="mini-label">Snapshot comercial</span>
+                  <span className="mini-chip">Preview premium</span>
+                </div>
+                <div className="hero-stat-grid">
+                  {trustMetrics.map((metric) => (
+                    <article key={metric.label} className="hero-stat">
+                      <strong>{metric.value}</strong>
+                      <span>{metric.label}</span>
+                    </article>
+                  ))}
+                </div>
+                <div className="hero-offer-preview">
+                  <div>
+                    <p>Oferta recomendada</p>
+                    <h3>Sura Auto Global Plus</h3>
+                  </div>
+                  <strong>$259.000</strong>
+                </div>
+              </div>
+
+              <div className="hero-card hero-card-secondary">
+                <div className="badge-row">
+                  <span className="soft-badge">
+                    <TimerReset size={14} />
+                    respuesta rapida
+                  </span>
+                  <span className="soft-badge">
+                    <Shield size={14} />
+                    respaldo multiaseguradora
+                  </span>
+                </div>
+
+                <div className="product-preview-list">
+                  {products.map((product) => (
+                    <div key={product.id} className="product-preview-item">
+                      <span className="product-preview-icon">{productIcon(product.id)}</span>
+                      <div>
+                        <strong>{product.name}</strong>
+                        <p>{product.subtitle}</p>
+                      </div>
+                      <ChevronRight size={16} />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -248,37 +252,44 @@ export default function HomePage() {
 
       <section id="productos" className="section">
         <div className="shell">
-          <span className="pill">Productos base</span>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 18,
-              alignItems: "end",
-              marginTop: 18,
-              flexWrap: "wrap",
-            }}
-          >
-            <h2 style={{ fontSize: "clamp(2.2rem, 4vw, 4rem)", maxWidth: 620 }}>
-              Mismo objetivo de negocio, propuesta propia y escalable.
-            </h2>
-            <p className="muted" style={{ maxWidth: 420 }}>
-              Esta primera entrega deja la experiencia lista para captar, cotizar y abrir
-              el camino a integraciones reales con tus credenciales.
+          <div className="section-heading">
+            <span className="section-kicker">Portafolio</span>
+            <h2>Una propuesta visual sobria para vender productos complejos con mas confianza.</h2>
+            <p>
+              El enfoque ya no es solo “tener un cotizador”, sino presentar una marca que
+              inspire respaldo desde la primera impresion.
             </p>
           </div>
 
-          <div className="grid-3" style={{ marginTop: 28 }}>
-            {products.map((product) => (
-              <article key={product.id} className="product-card">
-                <div className="badge badge-brand">
-                  {productIcon(product.id)}
-                  {product.name}
-                </div>
-                <h3 style={{ marginTop: 16, fontSize: 30 }}>{product.subtitle}</h3>
-                <p className="muted" style={{ marginTop: 10 }}>
-                  {product.accent}
-                </p>
+          <div className="editorial-grid">
+            {productNarrative.map((item) => (
+              <article key={item.eyebrow} className="editorial-card">
+                <span className="card-kicker">{item.eyebrow}</span>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="proceso" className="section section-contrast">
+        <div className="shell">
+          <div className="section-heading contrast">
+            <span className="section-kicker">Proceso UX</span>
+            <h2>Menos ruido. Mejor orientacion. Mucho mejor sensacion de producto.</h2>
+            <p>
+              El rediseño organiza la experiencia como lo haria una marca financiera cuidada:
+              claridad arriba, decision al centro y comparacion al final.
+            </p>
+          </div>
+
+          <div className="process-grid">
+            {process.map((step) => (
+              <article key={step.number} className="process-card">
+                <span>{step.number}</span>
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
               </article>
             ))}
           </div>
@@ -286,293 +297,266 @@ export default function HomePage() {
       </section>
 
       <section id="cotizador" className="section">
-        <div className="shell quote-grid">
-          <div className="stack">
-            <span className="pill">Cotizador demo funcional</span>
-            <h2 style={{ fontSize: "clamp(2.1rem, 4vw, 4rem)" }}>
-              Formulario comercial y ofertas comparadas.
-            </h2>
-            <p className="muted" style={{ fontSize: 17 }}>
-              Ya puedes probar la experiencia principal. El endpoint local devuelve ofertas
-              demo y luego lo cambiamos por la integracion real con tus aseguradoras.
+        <div className="shell quote-shell">
+          <div className="quote-intro">
+            <span className="section-kicker">Cotizador</span>
+            <h2>Una interfaz de captura que se ve limpia, premium y lista para conversion.</h2>
+            <p>
+              Mantuvimos la funcionalidad principal y rediseñamos por completo la presentacion.
+              El siguiente paso natural sera conectar carriers reales y CRM.
             </p>
+          </div>
 
-            <div className="stack">
-              {steps.map((step, index) => (
-                <div key={step.title} className="step-card">
-                  <div className="badge badge-accent">0{index + 1}</div>
-                  <h3 style={{ marginTop: 14, fontSize: 24 }}>{step.title}</h3>
-                  <p className="muted" style={{ marginTop: 8 }}>
-                    {step.text}
+          <div className="quote-layout">
+            <div className="quote-panel">
+              <form onSubmit={handleSubmit} className="quote-form">
+                <div className="product-switch">
+                  {products.map((product) => {
+                    const active = form.product === product.id;
+
+                    return (
+                      <button
+                        key={product.id}
+                        type="button"
+                        className={`product-switch-item${active ? " active" : ""}`}
+                        onClick={() => updateField("product", product.id)}
+                      >
+                        <span>{productIcon(product.id)}</span>
+                        <div>
+                          <strong>{product.name}</strong>
+                          <small>{product.subtitle}</small>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="quote-summary">
+                  <span className="card-kicker">Producto seleccionado</span>
+                  <h3>{selectedProduct.name}</h3>
+                  <p>{selectedProduct.accent}</p>
+                </div>
+
+                {(form.product === "auto" || form.product === "moto") && (
+                  <div className="segmented">
+                    <button
+                      type="button"
+                      className={`segment${form.hasPlate ? " active" : ""}`}
+                      onClick={() => updateField("hasPlate", true)}
+                    >
+                      Con placa
+                    </button>
+                    <button
+                      type="button"
+                      className={`segment${!form.hasPlate ? " active" : ""}`}
+                      onClick={() => updateField("hasPlate", false)}
+                    >
+                      Sin placa
+                    </button>
+                    <span className="segment-note">
+                      <Clock3 size={14} />
+                      primera lectura inmediata
+                    </span>
+                  </div>
+                )}
+
+                <div className="form-grid">
+                  <label className="field-block">
+                    <span>Identificador del vehiculo</span>
+                    {form.hasPlate && (form.product === "auto" || form.product === "moto") ? (
+                      <input
+                        className="field"
+                        value={form.plate}
+                        onChange={(event) => updateField("plate", event.target.value.toUpperCase())}
+                        placeholder="Ej. ABC123"
+                      />
+                    ) : (
+                      <input
+                        className="field"
+                        type="number"
+                        value={form.vehicleYear ?? ""}
+                        onChange={(event) => updateField("vehicleYear", Number(event.target.value))}
+                        placeholder="Ej. 2023"
+                      />
+                    )}
+                  </label>
+
+                  <label className="field-block">
+                    <span>Ciudad</span>
+                    <input
+                      className="field"
+                      value={form.city}
+                      onChange={(event) => updateField("city", event.target.value)}
+                      placeholder="Bogota"
+                    />
+                  </label>
+
+                  <label className="field-block">
+                    <span>
+                      {form.product === "auto" || form.product === "moto"
+                        ? "Valor aproximado"
+                        : "Documento"}
+                    </span>
+                    {form.product === "auto" || form.product === "moto" ? (
+                      <input
+                        className="field"
+                        type="number"
+                        value={form.vehicleValue ?? ""}
+                        onChange={(event) => updateField("vehicleValue", Number(event.target.value))}
+                        placeholder="62000000"
+                      />
+                    ) : (
+                      <input
+                        className="field"
+                        value={form.document}
+                        onChange={(event) => updateField("document", event.target.value)}
+                        placeholder="Documento"
+                      />
+                    )}
+                  </label>
+
+                  <label className="field-block">
+                    <span>Nombre completo</span>
+                    <input
+                      className="field"
+                      value={form.name}
+                      onChange={(event) => updateField("name", event.target.value)}
+                      placeholder="Nombre del prospecto"
+                      required
+                    />
+                  </label>
+
+                  <label className="field-block">
+                    <span>Celular</span>
+                    <input
+                      className="field"
+                      value={form.phone}
+                      onChange={(event) => updateField("phone", event.target.value)}
+                      placeholder="300 000 0000"
+                      required
+                    />
+                  </label>
+
+                  <label className="field-block">
+                    <span>Correo</span>
+                    <input
+                      className="field"
+                      type="email"
+                      value={form.email}
+                      onChange={(event) => updateField("email", event.target.value)}
+                      placeholder="correo@empresa.com"
+                      required
+                    />
+                  </label>
+                </div>
+
+                <div className="quote-actions">
+                  <button type="submit" className="btn btn-primary btn-large" disabled={isPending}>
+                    {isPending ? "Consultando ofertas..." : "Generar comparacion premium"}
+                    <ArrowRight size={18} />
+                  </button>
+                  <p>
+                    Esta version devuelve ofertas demo. La estructura ya esta lista para enlazar
+                    carriers reales sin rehacer la interfaz.
                   </p>
                 </div>
-              ))}
+              </form>
             </div>
-          </div>
 
-          <div className="glass hero-panel">
-            <form onSubmit={handleSubmit} className="stack">
-              <div className="grid-3">
-                {products.map((product) => {
-                  const active = form.product === product.id;
-                  return (
-                    <button
-                      key={product.id}
-                      type="button"
-                      className="btn"
-                      onClick={() => updateField("product", product.id)}
-                      style={{
-                        padding: 18,
-                        background: active ? "var(--brand-strong)" : "white",
-                        color: active ? "white" : "var(--ink)",
-                        border: active ? "none" : "1px solid var(--line)",
-                      }}
-                    >
-                      {productIcon(product.id)}
-                      {product.name}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div
-                style={{
-                  padding: 18,
-                  borderRadius: 22,
-                  background: "rgba(255,255,255,0.72)",
-                  border: "1px solid var(--line)",
-                }}
-              >
-                <strong>{selectedProduct.name}</strong>
-                <p className="muted" style={{ marginTop: 6 }}>
-                  {selectedProduct.subtitle}
+            <aside className="insight-panel">
+              <div className="insight-box dark">
+                <span className="card-kicker light">Direccion visual</span>
+                <h3>Mas criterio editorial, menos look generico de plantilla.</h3>
+                <p>
+                  El contraste, la tipografia y el espaciado ahora trabajan como una misma
+                  marca y no como bloques sueltos.
                 </p>
               </div>
+              <div className="insight-box">
+                <span className="soft-badge">
+                  <PhoneCall size={14} />
+                  cierre asistido
+                </span>
+                <span className="soft-badge">
+                  <MessageCircleMore size={14} />
+                  whatsapp listo
+                </span>
+                <span className="soft-badge">
+                  <BadgeCheck size={14} />
+                  comparacion inmediata
+                </span>
+              </div>
+            </aside>
+          </div>
 
-              {(form.product === "auto" || form.product === "moto") && (
-                <div className="grid-3">
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => updateField("hasPlate", true)}
-                    style={{
-                      background: form.hasPlate ? "var(--accent)" : "white",
-                      color: form.hasPlate ? "white" : "var(--ink)",
-                      border: form.hasPlate ? "none" : "1px solid var(--line)",
-                    }}
-                  >
-                    Con placa
-                  </button>
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => updateField("hasPlate", false)}
-                    style={{
-                      background: !form.hasPlate ? "var(--accent)" : "white",
-                      color: !form.hasPlate ? "white" : "var(--ink)",
-                      border: !form.hasPlate ? "none" : "1px solid var(--line)",
-                    }}
-                  >
-                    Sin placa
-                  </button>
-                  <div className="badge badge-brand" style={{ justifyContent: "center" }}>
-                    <Clock3 size={14} />
-                    entrega inmediata
-                  </div>
+          <div className="results-zone">
+            <div className="results-header">
+              <div>
+                <span className="section-kicker">Resultados</span>
+                <h2>Ofertas con lectura limpia para vender mejor.</h2>
+              </div>
+              {requestId ? <span className="request-pill">Solicitud {requestId}</span> : null}
+            </div>
+
+            <div className="results-list">
+              {offers.length > 0 ? (
+                offers.map((offer) => (
+                  <article key={`${requestId}-${offer.insurer}`} className="result-card fade-up">
+                    <div className="result-main">
+                      <div className="result-brand">
+                        <span className="soft-badge">
+                          <BadgeCheck size={14} />
+                          {offer.insurer}
+                        </span>
+                        <h3>{offer.plan}</h3>
+                        <p>{offer.highlight}</p>
+                      </div>
+
+                      <div className="result-price">
+                        <span>desde</span>
+                        <strong>${offer.monthlyPrice.toLocaleString("es-CO")}</strong>
+                        <small>por mes</small>
+                      </div>
+                    </div>
+
+                    <div className="benefit-grid">
+                      {offer.benefits.map((benefit) => (
+                        <div key={benefit} className="benefit-card">
+                          <Shield size={16} />
+                          <span>{benefit}</span>
+                        </div>
+                      ))}
+                      <div className="benefit-card accent">
+                        <Star size={16} />
+                        <span>Rating {offer.rating}</span>
+                      </div>
+                    </div>
+
+                    <div className="result-footer">
+                      <span>Deducible: {offer.deductible}</span>
+                      <div className="result-actions">
+                        <a className="btn btn-ghost-dark" href="https://wa.me/573000000000">
+                          Hablar por WhatsApp
+                        </a>
+                        <button className="btn btn-dark" type="button">
+                          Continuar cierre
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <div className="empty-results">
+                  <h3>Aqui apareceran las mejores opciones comparadas.</h3>
+                  <p>
+                    Completa el cotizador para ver una salida mucho mas elegante, clara y
+                    profesional que la version anterior.
+                  </p>
                 </div>
               )}
+            </div>
 
-              <div className="grid-3">
-                {form.hasPlate && (form.product === "auto" || form.product === "moto") ? (
-                  <input
-                    className="field"
-                    value={form.plate}
-                    onChange={(event) => updateField("plate", event.target.value.toUpperCase())}
-                    placeholder="Placa"
-                  />
-                ) : (
-                  <input
-                    className="field"
-                    type="number"
-                    value={form.vehicleYear ?? ""}
-                    onChange={(event) => updateField("vehicleYear", Number(event.target.value))}
-                    placeholder="Modelo"
-                  />
-                )}
-
-                <input
-                  className="field"
-                  value={form.city}
-                  onChange={(event) => updateField("city", event.target.value)}
-                  placeholder="Ciudad"
-                />
-
-                {(form.product === "auto" || form.product === "moto") ? (
-                  <input
-                    className="field"
-                    type="number"
-                    value={form.vehicleValue ?? ""}
-                    onChange={(event) => updateField("vehicleValue", Number(event.target.value))}
-                    placeholder="Valor aproximado"
-                  />
-                ) : (
-                  <input
-                    className="field"
-                    value={form.document}
-                    onChange={(event) => updateField("document", event.target.value)}
-                    placeholder="Documento"
-                  />
-                )}
-              </div>
-
-              <div className="grid-3">
-                <input
-                  className="field"
-                  value={form.name}
-                  onChange={(event) => updateField("name", event.target.value)}
-                  placeholder="Nombre completo"
-                  required
-                />
-                <input
-                  className="field"
-                  value={form.phone}
-                  onChange={(event) => updateField("phone", event.target.value)}
-                  placeholder="Celular"
-                  required
-                />
-                <input
-                  className="field"
-                  type="email"
-                  value={form.email}
-                  onChange={(event) => updateField("email", event.target.value)}
-                  placeholder="Correo"
-                  required
-                />
-              </div>
-
-              <button type="submit" className="btn btn-primary" disabled={isPending}>
-                {isPending ? "Consultando ofertas..." : "Ver mejores opciones ahora"}
-                <ArrowRight size={18} />
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <div className="shell" style={{ marginTop: 28 }}>
-          <div className="stack">
-            {offers.length > 0 ? (
-              offers.map((offer) => (
-                <article key={`${requestId}-${offer.insurer}`} className="offer-card fade-up">
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 18,
-                      alignItems: "start",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <div>
-                      <div className="badge badge-brand">
-                        <BadgeCheck size={14} />
-                        {offer.insurer}
-                      </div>
-                      <h3 style={{ fontSize: 30, marginTop: 12 }}>{offer.plan}</h3>
-                      <p className="muted" style={{ marginTop: 8, maxWidth: 720 }}>
-                        {offer.highlight}
-                      </p>
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: 14 }} className="muted">
-                        desde
-                      </div>
-                      <strong style={{ fontSize: 38 }}>
-                        ${offer.monthlyPrice.toLocaleString("es-CO")}
-                      </strong>
-                      <div className="muted">/ mes</div>
-                    </div>
-                  </div>
-
-                  <div className="soft-divider" style={{ margin: "18px 0" }} />
-
-                  <div className="grid-4">
-                    {offer.benefits.map((benefit) => (
-                      <div key={benefit} className="feature-card" style={{ padding: 16 }}>
-                        <ShieldCheck size={16} color="var(--brand)" />
-                        <div style={{ marginTop: 10, fontWeight: 700 }}>{benefit}</div>
-                      </div>
-                    ))}
-                    <div className="feature-card" style={{ padding: 16 }}>
-                      <Stars size={16} color="var(--accent)" />
-                      <div style={{ marginTop: 10, fontWeight: 700 }}>Rating {offer.rating}</div>
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 14,
-                      alignItems: "center",
-                      marginTop: 18,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <span className="muted">Deducible: {offer.deductible}</span>
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                      <a className="btn btn-secondary" href="https://wa.me/573000000000">
-                        Hablar con asesor
-                      </a>
-                      <button className="btn btn-primary" type="button">
-                        Continuar compra
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))
-            ) : (
-              <div className="offer-card">
-                <h3 style={{ fontSize: 28 }}>Aun no hay ofertas generadas.</h3>
-                <p className="muted" style={{ marginTop: 10 }}>
-                  Completa el formulario para ver una comparacion demo del flujo principal.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {serverMessage ? (
-            <p className="muted" style={{ marginTop: 16 }}>
-              {serverMessage}
-            </p>
-          ) : null}
-        </div>
-      </section>
-
-      <section id="arquitectura" className="section">
-        <div className="shell">
-          <span className="pill">Arquitectura sugerida</span>
-          <div className="grid-3" style={{ marginTop: 22 }}>
-            <article className="feature-card">
-              <h3 style={{ fontSize: 28 }}>Frontend comercial</h3>
-              <p className="muted" style={{ marginTop: 10 }}>
-                Landing, cotizador, resultados y CTA de cierre. Ya quedo planteado en este
-                proyecto con App Router y endpoint local.
-              </p>
-            </article>
-            <article className="feature-card">
-              <h3 style={{ fontSize: 28 }}>Broker middleware</h3>
-              <p className="muted" style={{ marginTop: 10 }}>
-                Capa privada donde conectas cada aseguradora, normalizas respuestas y
-                manejas credenciales sin exponerlas al frontend.
-              </p>
-            </article>
-            <article className="feature-card">
-              <h3 style={{ fontSize: 28 }}>CRM o bandeja comercial</h3>
-              <p className="muted" style={{ marginTop: 10 }}>
-                Leads, estados de cierre, documentos y renovaciones. Es el siguiente bloque
-                natural despues del cotizador.
-              </p>
-            </article>
+            {serverMessage ? <p className="server-note">{serverMessage}</p> : null}
           </div>
         </div>
       </section>
