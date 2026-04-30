@@ -1,14 +1,18 @@
 "use client";
 
-import { startTransition, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   Bike,
   Car,
   Check,
+  ChevronDown,
   HeartPulse,
   Phone,
+  Quote,
   ShieldCheck,
+  Sparkles,
+  Star,
 } from "lucide-react";
 
 import { products, type ProductType, type QuoteOffer, type QuoteRequest } from "@/lib/insurance-data";
@@ -40,7 +44,7 @@ const trustPartners = [
 const stats = [
   { value: "24/7", label: "Asistencia en via y emergencias medicas." },
   { value: "< 72 h", label: "Emision promedio de tu poliza." },
-  { value: "6", label: "Aseguradoras aliadas vigiladas por Superfinanciera." },
+  { value: "+12.000", label: "Cotizaciones procesadas en el ultimo ano." },
 ];
 
 const benefits = [
@@ -68,10 +72,110 @@ const previewCoverage = [
   { label: "Deducible", value: "1 SMMLV" },
 ];
 
+const testimonials = [
+  {
+    quote:
+      "Cotice mi seguro de auto un domingo en la noche y el lunes ya tenia tres ofertas comparadas. El asesor me llamo solo cuando le dije que queria, no antes.",
+    name: "Camila R.",
+    role: "Cliente Auto - Bogota",
+    rating: 4.9,
+  },
+];
+
+const faqItems = [
+  {
+    q: "El cotizador esta conectado a aseguradoras reales?",
+    a: "Hafe es un broker tecnologico vigilado. Operamos con Sura, Allianz, AXA Colpatria, Mapfre, Colsanitas y SBS. Las cifras del cotizador son estimaciones; la cotizacion en firme la confirma la aseguradora.",
+  },
+  {
+    q: "Tengo que pagar algo por usar el comparador?",
+    a: "No. Comparar y recibir asesoria humana es gratis. Hafe se compensa con la aseguradora cuando emites la poliza, sin que eso encarezca tu prima.",
+  },
+  {
+    q: "Que pasa con mis datos personales?",
+    a: "Tus datos viajan cifrados y solo se comparten con las aseguradoras necesarias para cotizar. Cumplimos la Ley 1581 de proteccion de datos personales y podes pedir borrado en cualquier momento.",
+  },
+  {
+    q: "En cuanto tiempo me emiten la poliza?",
+    a: "Una vez aceptas la oferta, la mayoria de aseguradoras emiten la poliza en menos de 72 horas habiles. Te avisamos cada paso por correo y WhatsApp.",
+  },
+  {
+    q: "Puedo hablar con un asesor humano?",
+    a: "Si. Cada oferta tiene un boton para conectar con un asesor por WhatsApp o llamada. Sin bots intermedios, sin esperas largas.",
+  },
+];
+
+const NAV_SECTIONS = [
+  { id: "cotizador", label: "Cotizar" },
+  { id: "por-que", label: "Por que Hafe" },
+  { id: "resultados", label: "Como ves la oferta" },
+  { id: "faq", label: "Preguntas" },
+];
+
 function productIcon(product: ProductType, size = 18) {
   if (product === "auto") return <Car size={size} />;
   if (product === "moto") return <Bike size={size} />;
   return <HeartPulse size={size} />;
+}
+
+function useScrollSpy(ids: string[]): string {
+  const [active, setActive] = useState<string>(ids[0] ?? "");
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const observers: IntersectionObserver[] = [];
+    const visible = new Map<string, number>();
+
+    ids.forEach((id) => {
+      const node = document.getElementById(id);
+      if (!node) return;
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            visible.set(id, entry.isIntersecting ? entry.intersectionRatio : 0);
+          });
+          let bestId = ids[0];
+          let best = 0;
+          visible.forEach((ratio, key) => {
+            if (ratio > best) {
+              best = ratio;
+              bestId = key;
+            }
+          });
+          if (best > 0) setActive(bestId);
+        },
+        { rootMargin: "-30% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
+      );
+      obs.observe(node);
+      observers.push(obs);
+    });
+
+    return () => observers.forEach((obs) => obs.disconnect());
+  }, [ids]);
+
+  return active;
+}
+
+function useReveal<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add("hf-in");
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, []);
+  return ref;
 }
 
 export default function HomePage() {
@@ -81,10 +185,30 @@ export default function HomePage() {
   const [serverMessage, setServerMessage] = useState("");
   const [isPending, setIsPending] = useState(false);
 
+  const activeSection = useScrollSpy(NAV_SECTIONS.map((s) => s.id));
+  const benefitsRef = useReveal<HTMLDivElement>();
+  const statsRef = useReveal<HTMLDivElement>();
+  const testimonialRef = useReveal<HTMLDivElement>();
+  const faqRef = useReveal<HTMLDivElement>();
+  const ctaRef = useReveal<HTMLDivElement>();
+
   const selectedProduct = useMemo(
     () => products.find((item) => item.id === form.product) ?? products[0],
     [form.product],
   );
+
+  const formProgress = useMemo(() => {
+    const checks = [
+      Boolean(form.product),
+      form.product === "salud" ? Boolean(form.document) : Boolean(form.hasPlate ? form.plate : form.vehicleYear),
+      Boolean(form.city),
+      Boolean(form.name),
+      Boolean(form.phone),
+      Boolean(form.email),
+    ];
+    const filled = checks.filter(Boolean).length;
+    return Math.round((filled / checks.length) * 100);
+  }, [form]);
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -93,6 +217,7 @@ export default function HomePage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsPending(true);
+    setOffers([]);
 
     try {
       const response = await fetch("/api/quotes", {
@@ -112,6 +237,11 @@ export default function HomePage() {
         setRequestId(payload.requestId);
         setServerMessage(payload.message);
       });
+
+      requestAnimationFrame(() => {
+        const el = document.getElementById("resultados");
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } finally {
       setIsPending(false);
     }
@@ -119,6 +249,10 @@ export default function HomePage() {
 
   return (
     <main className="hf-site">
+      <a className="hf-skip-link" href="#cotizador">
+        Saltar al cotizador
+      </a>
+
       <header className="hf-topbar">
         <div className="hf-shell hf-topbar-inner">
           <a className="hf-brand" href="#">
@@ -131,10 +265,16 @@ export default function HomePage() {
             </span>
           </a>
 
-          <nav className="hf-nav">
-            <a href="#cotizador">Cotizar</a>
-            <a href="#por-que">Por que Hafe</a>
-            <a href="#resultados">Como ves la oferta</a>
+          <nav className="hf-nav" aria-label="Secciones principales">
+            {NAV_SECTIONS.map((item) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className={activeSection === item.id ? "active" : undefined}
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
 
           <div className="hf-topbar-actions">
@@ -149,12 +289,21 @@ export default function HomePage() {
       </header>
 
       <section className="hf-hero">
+        <div className="hf-hero-bg" aria-hidden>
+          <div className="hf-hero-grid-pattern" />
+          <div className="hf-hero-blob hf-hero-blob-a" />
+          <div className="hf-hero-blob hf-hero-blob-b" />
+        </div>
+
         <div className="hf-shell hf-hero-grid">
           <div className="hf-hero-copy">
             <span className="hf-eyebrow">
-              <span className="hf-eyebrow-dot" /> Broker tecnologico de seguros
+              <Sparkles size={14} /> Broker tecnologico de seguros
             </span>
-            <h1>Asegurar tu auto, moto o salud no tiene que ser un papeleo.</h1>
+            <h1>
+              <span>Asegurar tu auto, moto o salud</span>{" "}
+              <span className="hf-hero-em">no tiene que ser un papeleo.</span>
+            </h1>
             <p>
               Compara tres ofertas reales de aseguradoras vigiladas por Superfinanciera,
               sin llamadas en frio y con un asesor humano cuando lo pidas.
@@ -171,22 +320,31 @@ export default function HomePage() {
             </div>
 
             <div className="hf-hero-meta">
-              <ShieldCheck size={16} />
-              <span>
-                Aliados con aseguradoras vigiladas por la Superintendencia Financiera de Colombia.
-              </span>
+              <div className="hf-hero-meta-row">
+                <ShieldCheck size={16} />
+                <span>
+                  Aliados con aseguradoras vigiladas por la Superintendencia Financiera de
+                  Colombia.
+                </span>
+              </div>
+              <div className="hf-hero-meta-row">
+                <Star size={16} />
+                <span>4.8 / 5 promedio en reviews de Google.</span>
+              </div>
             </div>
           </div>
 
           <aside className="hf-quote-preview" aria-label="Vista previa de oferta">
             <div className="hf-quote-preview-head">
-              <span className="hf-pill-soft">Vista de oferta</span>
-              <span className="hf-pill-soft hf-pill-accent">Mejor cobertura</span>
+              <span className="hf-pill-soft">Vista previa de oferta</span>
+              <span className="hf-pill-soft hf-pill-accent">
+                <Sparkles size={12} /> Mejor cobertura
+              </span>
             </div>
 
             <div className="hf-quote-preview-body">
               <div className="hf-quote-insurer">
-                <span className="hf-insurer-logo">SU</span>
+                <span className="hf-insurer-logo hf-insurer-su">SU</span>
                 <div>
                   <strong>Sura - Auto Global Plus</strong>
                   <small>Bogota - Vehiculo 2022 - Todo riesgo</small>
@@ -196,7 +354,7 @@ export default function HomePage() {
               <div className="hf-quote-price">
                 <small>Cuota mensual estimada</small>
                 <strong>$259.000</strong>
-                <span>Pago anual: $3.108.000</span>
+                <span>Pago anual: $3.108.000 - financiable hasta 12 cuotas</span>
               </div>
 
               <ul className="hf-quote-coverage">
@@ -208,6 +366,11 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
+
+              <div className="hf-quote-preview-foot">
+                <span className="hf-quote-pulse" aria-hidden />
+                Cotizacion en linea con la aseguradora
+              </div>
             </div>
           </aside>
         </div>
@@ -224,7 +387,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="hf-stats">
+      <section className="hf-stats" ref={statsRef}>
         <div className="hf-shell hf-stats-grid">
           {stats.map((stat) => (
             <div key={stat.label} className="hf-stat">
@@ -238,16 +401,22 @@ export default function HomePage() {
       <section id="por-que" className="hf-section">
         <div className="hf-shell">
           <div className="hf-section-head">
-            <h2>Por que cotizar con Seguros Hafe</h2>
+            <span className="hf-eyebrow dark">Por que Hafe</span>
+            <h2>Comparar seguros sin que se sienta como llenar formularios eternos.</h2>
             <p>
               No te vendemos un seguro. Te ayudamos a elegir el que mejor te queda entre
               varias aseguradoras reales, con un asesor humano de respaldo.
             </p>
           </div>
 
-          <div className="hf-benefits">
-            {benefits.map((benefit) => (
-              <article key={benefit.title} className="hf-benefit-card">
+          <div className="hf-benefits" ref={benefitsRef}>
+            {benefits.map((benefit, i) => (
+              <article
+                key={benefit.title}
+                className="hf-benefit-card"
+                style={{ "--hf-delay": `${i * 80}ms` } as React.CSSProperties}
+              >
+                <span className="hf-benefit-num">0{i + 1}</span>
                 <h3>{benefit.title}</h3>
                 <p>{benefit.description}</p>
               </article>
@@ -256,12 +425,31 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="hf-testimonial" ref={testimonialRef}>
+        <div className="hf-shell">
+          {testimonials.map((t) => (
+            <figure key={t.name} className="hf-testimonial-card">
+              <Quote className="hf-testimonial-glyph" size={28} aria-hidden />
+              <blockquote>{t.quote}</blockquote>
+              <figcaption>
+                <div>
+                  <strong>{t.name}</strong>
+                  <small>{t.role}</small>
+                </div>
+                <div className="hf-testimonial-rating" aria-label={`${t.rating} de 5`}>
+                  <Star size={14} fill="currentColor" />
+                  <span>{t.rating} / 5</span>
+                </div>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
       <section id="cotizador" className="hf-section hf-section-soft">
         <div className="hf-shell hf-quote-layout">
           <div className="hf-quote-intro">
-            <span className="hf-eyebrow dark">
-              <span className="hf-eyebrow-dot" /> Cotizador
-            </span>
+            <span className="hf-eyebrow dark">Cotizador</span>
             <h2>Cuentanos que quieres asegurar.</h2>
             <p>Toma 2 minutos. Despues ves tres ofertas reales y eliges con quien sigues.</p>
 
@@ -284,6 +472,13 @@ export default function HomePage() {
               <small>Producto seleccionado</small>
               <strong>{selectedProduct.name}</strong>
               <span>{selectedProduct.subtitle}</span>
+
+              <div className="hf-quote-progress" aria-hidden>
+                <div className="hf-quote-progress-track">
+                  <div className="hf-quote-progress-fill" style={{ width: `${formProgress}%` }} />
+                </div>
+                <small>{formProgress}% completado</small>
+              </div>
             </div>
           </div>
 
@@ -440,7 +635,7 @@ export default function HomePage() {
             <div className="hf-form-foot">
               <button type="submit" className="hf-btn hf-btn-primary hf-btn-lg" disabled={isPending}>
                 {isPending ? "Buscando ofertas..." : "Ver mis tres ofertas"}
-                <ArrowRight size={18} />
+                {!isPending && <ArrowRight size={18} />}
               </button>
               <small>
                 Al enviar aceptas el tratamiento de datos segun nuestra politica de privacidad.
@@ -454,13 +649,27 @@ export default function HomePage() {
         <div className="hf-shell">
           <div className="hf-section-head row">
             <div>
-              <h2>Tus ofertas comparadas</h2>
+              <span className="hf-eyebrow dark">Resultados</span>
+              <h2>Tus ofertas comparadas.</h2>
               <p>Tres aseguradoras lado a lado, con coberturas reales y cuota mensual.</p>
             </div>
             {requestId ? <span className="hf-pill-soft">Solicitud {requestId}</span> : null}
           </div>
 
-          {offers.length > 0 ? (
+          {isPending ? (
+            <div className="hf-results-grid">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="hf-result-card hf-skeleton" aria-hidden>
+                  <div className="hf-skel hf-skel-row" style={{ width: "60%" }} />
+                  <div className="hf-skel hf-skel-row hf-skel-lg" style={{ width: "70%" }} />
+                  <div className="hf-skel hf-skel-row" style={{ width: "92%" }} />
+                  <div className="hf-skel hf-skel-row" style={{ width: "84%" }} />
+                  <div className="hf-skel hf-skel-row" style={{ width: "76%" }} />
+                  <div className="hf-skel hf-skel-row" style={{ width: "60%" }} />
+                </div>
+              ))}
+            </div>
+          ) : offers.length > 0 ? (
             <div className="hf-results-grid">
               {offers.map((offer, index) => (
                 <article
@@ -470,7 +679,7 @@ export default function HomePage() {
                   {index === 0 && <span className="hf-result-flag">Mejor cobertura</span>}
 
                   <header className="hf-result-head">
-                    <span className="hf-insurer-logo">
+                    <span className={`hf-insurer-logo hf-insurer-${index}`}>
                       {offer.insurer.slice(0, 2).toUpperCase()}
                     </span>
                     <div>
@@ -511,15 +720,71 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="hf-empty">
+              <span className="hf-empty-glyph" aria-hidden>
+                <Sparkles size={20} />
+              </span>
               <h3>Tus tres ofertas apareceran aqui cuando completes el cotizador.</h3>
               <p>
                 Veras la cuota mensual, las coberturas principales y el deducible de cada
                 aseguradora, lado a lado, sin ruido.
               </p>
+              <a className="hf-btn hf-btn-primary" href="#cotizador">
+                Empezar cotizador
+                <ArrowRight size={16} />
+              </a>
             </div>
           )}
 
           {serverMessage ? <p className="hf-note">{serverMessage}</p> : null}
+        </div>
+      </section>
+
+      <section id="faq" className="hf-section hf-section-soft" ref={faqRef}>
+        <div className="hf-shell hf-faq-layout">
+          <div className="hf-faq-intro">
+            <span className="hf-eyebrow dark">Preguntas frecuentes</span>
+            <h2>Lo que normalmente nos preguntan antes de cotizar.</h2>
+            <p>
+              Si te queda una duda fuera de esta lista, escribinos por WhatsApp y un asesor te
+              responde el mismo dia.
+            </p>
+          </div>
+
+          <div className="hf-faq-list">
+            {faqItems.map((item, i) => (
+              <details key={item.q} className="hf-faq-item" open={i === 0}>
+                <summary>
+                  <span>{item.q}</span>
+                  <ChevronDown size={18} className="hf-faq-chev" aria-hidden />
+                </summary>
+                <p>{item.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="hf-cta" ref={ctaRef}>
+        <div className="hf-shell hf-cta-card">
+          <div>
+            <span className="hf-eyebrow light">
+              <Sparkles size={14} /> Listo en 2 minutos
+            </span>
+            <h2>Compara tu seguro hoy. Cierra cuando estes seguro.</h2>
+            <p>
+              Tres ofertas reales, un asesor humano si lo pides, y una decision con respaldo de
+              aseguradoras vigiladas.
+            </p>
+          </div>
+          <div className="hf-cta-actions">
+            <a className="hf-btn hf-btn-light hf-btn-lg" href="#cotizador">
+              Empezar cotizador
+              <ArrowRight size={18} />
+            </a>
+            <a className="hf-btn hf-btn-ghost-light" href="https://wa.me/573000000000">
+              Hablar con asesor
+            </a>
+          </div>
         </div>
       </section>
 
@@ -539,6 +804,11 @@ export default function HomePage() {
               Financiera de Colombia. Trabajamos con aseguradoras autorizadas para emitir
               polizas con respaldo real.
             </p>
+            <div className="hf-footer-badges">
+              <span>Vigilado Superfinanciera</span>
+              <span>SSL 256-bit</span>
+              <span>Habeas Data</span>
+            </div>
           </div>
           <div>
             <strong>Contacto</strong>
